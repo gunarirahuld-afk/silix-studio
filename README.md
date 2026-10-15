@@ -1,81 +1,101 @@
-# Global RTL Design Cloud API 🌐⚡
+# SILIX — Next-Gen Cloud Semiconductor & Silicon RTL Studio 🔬⚡
 
-An open, high-performance API for digital chip designers, university students, freshers, and semiconductor teams worldwide.
+[![Live Web Studio](https://img.shields.io/badge/Live%20Web%20Studio-trycloudflare-38bdf8?style=for-the-badge&logo=cloudflare)](https://britney-legitimate-hunter-cooler.trycloudflare.com)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-10b981?style=for-the-badge)](LICENSE)
+[![Silicon PDK: SkyWater 130nm](https://img.shields.io/badge/PDK-SkyWater%20130nm-f59e0b?style=for-the-badge)](https://github.com/google/skywater-pdk)
 
----
+**SILIX** is an open-access, cloud-native semiconductor EDA platform that allows anyone—from university students and freshers to silicon hardware engineers—to design, simulate, inspect, and synthesize digital ASIC circuits directly in their web browser for free.
 
-## 🚀 Key Features
-
-* **Instant RTL Linting (`POST /v1/rtl/lint`):** Checks Verilog/SystemVerilog for common hardware bugs:
-  * Inferred latches (missing `else` or missing `default:` in `case`).
-  * Blocking assignments (`=`) in sequential `always @(posedge clk)` blocks.
-  * Non-blocking assignments (`<=`) in combinational blocks.
-  * Multi-driven net short circuits.
-  * Educational explanations tailored for students & freshers.
-* **Cycle-Accurate Simulation (`POST /v1/rtl/simulate`):**
-  * Outputs standard **IEEE 1364 VCD (Value Change Dump)** files.
-  * Generates **WaveDrom JSON** for direct visual rendering in any web browser or UI.
-* **Hardware Schematic Extraction (`POST /v1/rtl/schematic`):**
-  * Parses I/O ports, registers, and interconnects.
-  * Outputs a **Mermaid.js Flowchart** showing physical hardware topology.
-* **Interactive OpenAPI / Swagger Documentation:** Available at `http://localhost:8000/docs`.
+🌐 **Public Live URL:** [https://britney-legitimate-hunter-cooler.trycloudflare.com](https://britney-legitimate-hunter-cooler.trycloudflare.com)  
+📖 **Interactive Swagger Docs:** [https://britney-legitimate-hunter-cooler.trycloudflare.com/docs](https://britney-legitimate-hunter-cooler.trycloudflare.com/docs)  
+🐙 **GitHub Repository:** [https://github.com/gunarirahuld-afk/silix-studio](https://github.com/gunarirahuld-afk/silix-studio)
 
 ---
 
-## 🛠️ Quickstart (Local Development)
+## 🌟 Core Silicon Capabilities
 
-### 1. Activate Environment & Run
-```powershell
-# From the project root
-.venv\Scripts\uvicorn app.main:app --reload --port 8000
-```
+1. **Interactive Sub-Circuit Drill-Down Inspector 🔬**
+   - Click on **any block** in the generated circuit schematic to open the internal hardware inspector:
+     - **ALU**: Multi-function arithmetic units with parallel CLA adder/subtractor, bitwise logic, barrel shifter, comparator, opcode MUX tree, and condition flags (`Z`, `C`, `V`, `N`).
+     - **Counters & Shift Registers**: Synchronous incrementers with feedback loop routing and terminal count detectors.
+     - **D-Flip-Flop (DFF)**: Master-Slave transmission gate latch stages (`TG1`, `TG2`), back-to-back CMOS inverter loops, clock buffer, and reset logic.
+     - **Multiplexers (MUX)**: Binary address decoding matrix and wide OR summing gate.
+     - **Finite State Machines (FSM)**: Next-State combinational decoding, State Register DFF array, and output decode logic.
+     - **Logic Gates**: Transistor-level complementary CMOS PMOS pull-up and NMOS pull-down networks.
+   - **Live Simulation Probes**: Displays the live probed logic values on all input/output pins.
+   - **SkyWater 130nm PDK Cell Breakdown**: Lists physical standard cells (`sky130_fd_sc_hd__dfxtp_1`, `sky130_fd_sc_hd__fa_1`, etc.).
 
-### 2. View Interactive Swagger Docs
-Open your browser to:
-```
-http://localhost:8000/docs
-```
+2. **Cycle-Accurate Event Simulation & Waveforms 📊**
+   - Simulates sequential and combinational RTL designs.
+   - Outputs standard **IEEE-1364 VCD (Value Change Dump)** files.
+   - Renders interactive visual timing diagrams powered by **WaveDrom**.
 
----
+3. **SkyWater 130nm ASIC Silicon Synthesis 🏭**
+   - Synthesizes Verilog RTL into standard cells from Google & SkyWater's open-source 130nm PDK.
+   - Computes total standard cell count, sequential flip-flops, estimated silicon area ($\mu m^2$), and maximum clock frequency ($F_{\text{max}}$ in MHz).
 
-## 📡 API Endpoints & Examples
-
-### 1. Lint Verilog Code
-```bash
-curl -X POST "http://localhost:8000/v1/rtl/lint" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "code": "module bad_counter(input clk, output reg [3:0] q); always @(posedge clk) q = q + 1; endmodule"
-     }'
-```
-
-### 2. Run Simulation & Get Waveforms
-```bash
-curl -X POST "http://localhost:8000/v1/rtl/simulate" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "module_code": "module counter(input clk, input rst_n, output reg [3:0] count); always @(posedge clk) if (!rst_n) count <= 0; else count <= count + 1; endmodule",
-       "cycles": 16,
-       "reset_active_low": true
-     }'
-```
-
-### 3. Generate Circuit Schematic
-```bash
-curl -X POST "http://localhost:8000/v1/rtl/schematic" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "code": "module adder(input [3:0] a, input [3:0] b, output [3:0] sum); assign sum = a + b; endmodule"
-     }'
-```
+4. **AI Hardware Mentor & Synthesizability Diagnostics 💡**
+   - Automatically detects educational hardware design bugs:
+     - Inferred latches from incomplete `if-else` or missing `default:` in `case`.
+     - Blocking assignments (`=`) inside sequential `always @(posedge clk)` blocks.
+     - Race conditions and multi-driven net contention.
 
 ---
 
-## 🐳 Docker Deployment
+## 🚀 Instant Quickstart (Local)
 
-To run in a container with full open-source EDA tools (`iverilog`, `yosys`, `verilator`):
+### Prerequisites
+- Python 3.10+
 
 ```bash
-docker build -t rtl-cloud-api .
-docker run -p 8000:8000 rtl-cloud-api
+# Clone the repository
+git clone https://github.com/gunarirahuld-afk/silix-studio.git
+cd silix-studio
+
+# Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the SILIX server
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
+
+Open your browser to: **`http://localhost:8000`**
+
+---
+
+## ☁️ 1-Click Permanent Free Cloud Deployment
+
+### Deploy to Render
+1. Fork or push this repository to your GitHub.
+2. In [Render.com](https://render.com), click **New +** → **Web Service**.
+3. Select your repository.
+4. Set Environment to **Docker** and Port to `8000`.
+5. Click **Deploy**!
+
+### Deploy to Hugging Face Spaces (24/7 Free)
+1. Create a new Space at [huggingface.co/new-space](https://huggingface.co/new-space).
+2. Choose **Docker** as the SDK.
+3. Push this repository's code to the Space's Git URL.
+
+---
+
+## 📡 REST API Reference
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/health` | `GET` | Health check & engine status |
+| `/v1/info` | `GET` | Platform specifications and capabilities |
+| `/v1/rtl/lint` | `POST` | Hardware syntax & synthesizability linting |
+| `/v1/rtl/simulate` | `POST` | Cycle-accurate simulation with VCD & WaveDrom |
+| `/v1/rtl/schematic` | `POST` | Port map, netlist, and sub-circuit blocks |
+| `/v1/rtl/synthesize` | `POST` | SkyWater 130nm ASIC cell mapping and area calculation |
+
+---
+
+## 📄 License
+Released under the MIT License. Open-source and free for students, educators, and silicon engineers worldwide.

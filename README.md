@@ -1,14 +1,14 @@
 # SILIX — Silicon RTL Studio 🔬⚡
 
-[![Live Web Studio](https://img.shields.io/badge/Live%20Web%20Studio-trycloudflare-38bdf8?style=for-the-badge&logo=cloudflare)](https://britney-legitimate-hunter-cooler.trycloudflare.com)
+[![Live Web Studio](https://img.shields.io/badge/Live%20Web%20Studio-trycloudflare-38bdf8?style=for-the-badge&logo=cloudflare)](https://ought-upc-literally-urw.trycloudflare.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10b981?style=for-the-badge)](LICENSE)
 [![Silicon PDK: SkyWater 130nm](https://img.shields.io/badge/PDK-SkyWater%20130nm-f59e0b?style=for-the-badge)](https://github.com/google/skywater-pdk)
 
 **SILIX** is an open-access, cloud-native semiconductor EDA platform that allows anyone—from university students and freshers to silicon hardware engineers—to design, simulate, inspect, and synthesize digital ASIC circuits directly in their web browser for free.
 
-🌐 **Public Live URL:** [https://britney-legitimate-hunter-cooler.trycloudflare.com](https://britney-legitimate-hunter-cooler.trycloudflare.com)  
-📖 **Interactive Swagger Docs:** [https://britney-legitimate-hunter-cooler.trycloudflare.com/docs](https://britney-legitimate-hunter-cooler.trycloudflare.com/docs)  
+🌐 **Public Live URL:** [https://ought-upc-literally-urw.trycloudflare.com](https://ought-upc-literally-urw.trycloudflare.com)  
+📖 **Interactive Swagger Docs:** [https://ought-upc-literally-urw.trycloudflare.com/docs](https://ought-upc-literally-urw.trycloudflare.com/docs)  
 🐙 **GitHub Repository:** [https://github.com/gunarirahuld-afk/silix-studio](https://github.com/gunarirahuld-afk/silix-studio)
 
 ---

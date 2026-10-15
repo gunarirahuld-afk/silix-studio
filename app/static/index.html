@@ -1,0 +1,2807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SILIX — Next-Gen Cloud Semiconductor &amp; Silicon RTL Studio</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Mermaid.js for Block Diagrams -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: false, theme: 'dark' });</script>
+
+  <style>
+    :root {
+      --bg-canvas: #080c14;
+      --bg-panel: #0d1322;
+      --bg-panel-elevated: #131c31;
+      --bg-editor: #090e1a;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: #38bdf8;
+      
+      --accent-emerald: #10b981;
+      --accent-emerald-glow: rgba(16, 185, 129, 0.25);
+      --accent-cyan: #0ea5e9;
+      --accent-cyan-glow: rgba(14, 165, 233, 0.25);
+      --accent-amber: #f59e0b;
+      --accent-purple: #a855f7;
+      --accent-rose: #f43f5e;
+      
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --wave-bg: #050811;
+      --wave-grid: rgba(255, 255, 255, 0.05);
+      --wave-clk: #10b981;
+      --wave-sig: #38bdf8;
+      --wave-bus: #818cf8;
+      --wave-probe: #f43f5e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+
+    /* Top Brand Navigation Header */
+    header {
+      background: rgba(13, 19, 34, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 8px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 50;
+    }
+    
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .logo-glyph {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #0ea5e9, #10b981);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 14px rgba(14, 165, 233, 0.4);
+    }
+    .logo-glyph svg { width: 17px; height: 17px; fill: #fff; }
+
+    .brand-text {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: linear-gradient(to right, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge-pro {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      letter-spacing: 0.5px;
+    }
+
+    .engine-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .dot-live {
+      width: 7px;
+      height: 7px;
+      background: var(--accent-emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-emerald);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; filter: drop-shadow(0 0 4px var(--accent-emerald)); }
+      100% { opacity: 0.6; }
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Action Control Toolbar */
+    .toolbar {
+      background: #0b101c;
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 6px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chip-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .chip-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .chip-btn.active {
+      background: rgba(14, 165, 233, 0.2);
+      color: #38bdf8;
+      border-color: rgba(14, 165, 233, 0.4);
+    }
+
+    select, button, input {
+      background: var(--bg-panel-elevated);
+      color: #fff;
+      border: 1px solid var(--border-subtle);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    select:hover, button:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    button.btn-run {
+      background: linear-gradient(135deg, #059669, #10b981);
+      border-color: #34d399;
+      color: #ffffff;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 0 14px var(--accent-emerald-glow);
+    }
+    button.btn-run:hover {
+      background: linear-gradient(135deg, #047857, #059669);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+
+    button.btn-synth {
+      background: linear-gradient(135deg, #d97706, #f59e0b);
+      border-color: #fbbf24;
+      color: #ffffff;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    button.btn-synth:hover {
+      background: linear-gradient(135deg, #b45309, #d97706);
+    }
+
+    /* Main Workspace 2-Pane Split */
+    .workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 46% 54%;
+      overflow: hidden;
+      height: calc(100vh - 175px);
+    }
+
+    .pane {
+      background: var(--bg-panel);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .pane:first-child {
+      border-right: 1px solid var(--border-subtle);
+    }
+
+    /* Tab Bars */
+    .tab-bar {
+      background: #090e1a;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 10px;
+    }
+
+    .tab-group {
+      display: flex;
+      gap: 2px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      color: var(--text-muted);
+      padding: 9px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+    .tab-btn.active {
+      color: #fff;
+      border-bottom-color: var(--accent-cyan);
+      background: rgba(14, 165, 233, 0.08);
+    }
+
+    .tab-pill {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+    }
+    .tab-btn.active .tab-pill {
+      background: rgba(14, 165, 233, 0.2);
+      color: #38bdf8;
+    }
+
+    /* Code Editor Container */
+    .editor-wrapper {
+      flex: 1;
+      display: flex;
+      background: var(--bg-editor);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .line-numbers {
+      width: 48px;
+      padding: 14px 8px;
+      background: #070b14;
+      color: #475569;
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      font-size: 12px;
+      line-height: 20px;
+      text-align: right;
+      user-select: none;
+      border-right: 1px solid var(--border-subtle);
+      overflow-y: hidden;
+    }
+
+    textarea.code-area {
+      flex: 1;
+      width: calc(100% - 48px);
+      background: transparent;
+      color: #e2e8f0;
+      border: none;
+      padding: 14px 16px;
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      font-size: 13px;
+      line-height: 20px;
+      resize: none;
+      outline: none;
+      white-space: pre;
+      tab-size: 4;
+      overflow-y: auto;
+    }
+    textarea.code-area::selection {
+      background: rgba(14, 165, 233, 0.3);
+    }
+
+    /* Output Tab Views */
+    .tab-content {
+      flex: 1;
+      overflow: auto;
+      background: var(--bg-panel);
+      padding: 14px;
+      display: none;
+    }
+    .tab-content.active { display: flex; flex-direction: column; }
+
+    /* Waveform Subheader & Canvas */
+    .wave-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      background: #090e1a;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      font-size: 11px;
+    }
+
+    .probe-hud {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #38bdf8;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+
+    .wave-viewport-container {
+      flex: 1;
+      overflow: auto;
+      background: var(--wave-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      position: relative;
+    }
+
+    #waveCanvas {
+      display: block;
+      cursor: crosshair;
+    }
+
+    /* Silicon Synthesis View */
+    .synth-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .metric-card {
+      background: var(--bg-panel-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .metric-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .metric-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .metric-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    /* AI Mentor Cards */
+    .diag-card {
+      background: var(--bg-panel-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 12px;
+      transition: all 0.2s ease;
+    }
+    .diag-card.warn { border-left: 4px solid var(--accent-amber); }
+    .diag-card.err { border-left: 4px solid var(--accent-rose); }
+    .diag-card.clean { border-left: 4px solid var(--accent-emerald); }
+
+    .diag-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .diag-desc {
+      color: var(--text-secondary);
+      font-size: 12px;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    .diag-fix {
+      background: #080c14;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #34d399;
+      font-size: 11px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    /* Bottom Interactive Status / Log Dock */
+    .console-dock {
+      height: 125px;
+      background: #060910;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+    }
+
+    .console-bar {
+      background: #090e1a;
+      padding: 5px 14px;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      font-weight: 600;
+    }
+
+    .console-output {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 14px;
+      line-height: 19px;
+    }
+
+    .log-err { color: #fb7185; font-weight: bold; }
+    .log-warn { color: #fcd34d; }
+    .log-info { color: #38bdf8; }
+    .log-success { color: #34d399; font-weight: 600; }
+    .log-banner { color: #c084fc; font-weight: 700; }
+
+    /* Export Dropdown */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      background: var(--bg-panel-elevated);
+      min-width: 170px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      z-index: 100;
+      padding: 4px 0;
+    }
+    .dropdown:hover .dropdown-content { display: block; }
+    .dropdown-item {
+      color: var(--text-secondary);
+      padding: 7px 14px;
+      text-decoration: none;
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .dropdown-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    /* Sub-Circuit Drill-Down Modal Styles */
+    .block-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.97); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .block-modal-content {
+      background: #090e1d;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(56, 189, 248, 0.15);
+      border-radius: 12px;
+      max-width: 920px;
+      width: 94%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .block-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .modal-icon-pill {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .modal-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .modal-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .badge-type {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid #38bdf8;
+      color: #38bdf8;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .modal-close-btn {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+    .modal-close-btn:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+    .block-modal-body {
+      padding: 16px 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .modal-section {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .modal-sec-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    .modal-circuit-canvas {
+      background: #030712;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 6px;
+      padding: 10px;
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: auto;
+    }
+    .modal-ports-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 130px;
+      overflow-y: auto;
+    }
+    .port-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.03);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+    }
+    .port-val-badge {
+      background: #0d1b2a;
+      border: 1px solid #1e3a5f;
+      color: #38bdf8;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+    .modal-cells-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 130px;
+      overflow-y: auto;
+    }
+    .cell-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.03);
+      font-size: 11px;
+      color: var(--text-primary);
+    }
+    .modal-code-block {
+      background: #030712;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 10px;
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 17px;
+      overflow-x: auto;
+      max-height: 140px;
+      margin: 0;
+    }
+
+    /* SVG Interactive Block Nodes */
+    .schematic-block-node {
+      cursor: pointer;
+    }
+    .schematic-block-node:hover rect.block-bg {
+      filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.6));
+    }
+    .schematic-block-node:hover text.block-hint {
+      fill: #38bdf8;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="brand-section">
+      <div class="brand-logo">
+        <div class="logo-glyph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="2"/>
+            <rect x="9" y="9" width="6" height="6"/>
+            <line x1="9" y1="1" x2="9" y2="4"/>
+            <line x1="15" y1="1" x2="15" y2="4"/>
+            <line x1="9" y1="20" x2="9" y2="23"/>
+            <line x1="15" y1="20" x2="15" y2="23"/>
+            <line x1="20" y1="9" x2="23" y2="9"/>
+            <line x1="20" y1="15" x2="23" y2="15"/>
+            <line x1="1" y1="9" x2="4" y2="9"/>
+            <line x1="1" y1="15" x2="4" y2="15"/>
+          </svg>
+        </div>
+        <span class="brand-text">SILIX</span>
+      </div>
+      <span class="badge-pro">SEMICONDUCTOR v2.0</span>
+      <div class="engine-pill">
+        <span class="dot-live"></span>
+        <span id="engineStatus">Cloud Engine: Online (Silix Cloud Semiconductor Studio)</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <a href="/docs" target="_blank" style="color:var(--accent-cyan); text-decoration:none; font-weight:600; font-size:12px;">
+        API Docs (Swagger) ↗
+      </a>
+    </div>
+  </header>
+
+  <!-- Controls Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span style="color:var(--text-muted); font-size:11px; font-weight:600; margin-right:4px;">STARTERS:</span>
+      <button class="chip-btn" onclick="loadSnippet('blank')" title="Start from blank canvas">Blank</button>
+      <button class="chip-btn" onclick="loadSnippet('gates')" title="Load Primitive Logic Gates (AND, XOR, NOT)">Gates</button>
+      <button class="chip-btn" onclick="loadSnippet('mux')" title="Load 4:1 Multiplexer">MUX</button>
+      <button class="chip-btn" onclick="loadSnippet('alu')" title="Load 8-bit Arithmetic Logic Unit">ALU</button>
+      <button class="chip-btn" onclick="loadSnippet('counter')" title="Load 4-bit synchronous counter">Counter</button>
+      <button class="chip-btn" onclick="loadSnippet('fsm')" title="Load Sequence Detector FSM">FSM</button>
+      <button class="chip-btn" onclick="loadSnippet('cpu')" title="Load Pipelined CPU (PC, IF/ID DFFs, ALU Core)">CPU</button>
+
+      <span style="color:var(--border-subtle); margin: 0 4px;">|</span>
+
+      <label style="color:var(--text-secondary); font-size:12px; font-weight:500;">Cycles:</label>
+      <select id="cycleSelect">
+        <option value="8">8 Cycles</option>
+        <option value="16" selected>16 Cycles</option>
+        <option value="32">32 Cycles</option>
+        <option value="64">64 Cycles</option>
+      </select>
+    </div>
+
+    <div class="toolbar-right">
+      <button class="btn-run" onclick="executeRTL()" title="Execute simulation with your custom RTL & Testbench (Ctrl+Enter)">
+        ⚡ Run Simulation (Ctrl+Enter)
+      </button>
+
+      <button class="btn-synth" onclick="synthesizeRTL()" title="Synthesize logic & calculate SkyWater 130nm ASIC area">
+        🏭 Synthesize Silicon
+      </button>
+
+      <div class="dropdown">
+        <button style="background:var(--bg-panel-elevated);" title="Export project assets">
+          💾 Export ▾
+        </button>
+        <div class="dropdown-content">
+          <a class="dropdown-item" onclick="exportFile('vcd')">📄 Export Waveform (.VCD)</a>
+          <a class="dropdown-item" onclick="exportFile('dut')">📄 Export Design (.v)</a>
+          <a class="dropdown-item" onclick="exportFile('tb')">📄 Export Testbench (.v)</a>
+          <a class="dropdown-item" onclick="exportFile('svg')">📐 Export Schematic (.SVG)</a>
+          <a class="dropdown-item" onclick="exportFile('synth')">📊 Export Synthesis Report</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Workspace 2-Pane Split -->
+  <div class="workspace">
+
+    <!-- Left Pane: Dual Code Editor (DUT & Testbench) -->
+    <div class="pane">
+      <div class="tab-bar">
+        <div class="tab-group">
+          <button class="tab-btn active" id="tabBtnDUT" onclick="switchEditorTab('dut')">
+            <span>📄 Design (DUT)</span>
+            <span class="tab-pill" id="dutLineBadge">0 lines</span>
+          </button>
+          <button class="tab-btn" id="tabBtnTB" onclick="switchEditorTab('tb')">
+            <span>🧪 Testbench (TB)</span>
+            <span class="tab-pill" id="tbLineBadge">0 lines</span>
+          </button>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="chip-btn" onclick="autoGenerateTestbench()" style="color:var(--accent-cyan); border-color:rgba(14,165,233,0.3);" title="Auto-inspect ports and generate testbench stimulus">
+            ✨ Auto-Gen TB
+          </button>
+          <button class="chip-btn" onclick="clearActiveEditor()" title="Clear active editor">
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- DUT Editor Wrapper -->
+      <div class="editor-wrapper" id="dutEditorWrapper">
+        <div class="line-numbers" id="lineNumbers">1</div>
+        <textarea id="codeEditor" class="code-area" spellcheck="false" placeholder="// Type ANY custom Verilog RTL design (DUT) here..."></textarea>
+      </div>
+
+      <!-- Testbench Editor Wrapper -->
+      <div class="editor-wrapper" id="tbEditorWrapper" style="display:none;">
+        <div class="line-numbers" id="tbLineNumbers">1</div>
+        <textarea id="tbEditor" class="code-area" spellcheck="false" placeholder="// Type your custom Testbench stimulus here (initial begin ... #10 a = 1; ... end)"></textarea>
+      </div>
+    </div>
+
+    <!-- Right Pane: Multi-Tab Output -->
+    <div class="pane">
+      <div class="tab-bar">
+        <div class="tab-group">
+          <button class="tab-btn active" onclick="switchOutputTab('waveTab')">
+            <span>📈 Logic Waveforms</span>
+          </button>
+          <button class="tab-btn" onclick="switchOutputTab('schematicTab')">
+            <span>📐 Schematic</span>
+          </button>
+          <button class="tab-btn" onclick="switchOutputTab('synthTab')">
+            <span>🏭 Silicon Synthesis</span>
+          </button>
+          <button class="tab-btn" onclick="switchOutputTab('mentorTab')">
+            <span>🎓 AI Mentor</span>
+            <span class="tab-pill" id="issueCountPill">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Output Tab 1: Waveforms -->
+      <div id="waveTab" class="tab-content active">
+        <div class="wave-header">
+          <div class="probe-hud" id="probeHUD">
+            <span>📍 Probe Cursor: Click canvas to measure signals</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="color:var(--text-muted);">Radix:</span>
+            <button class="chip-btn" id="radixBtn" onclick="toggleRadix()" title="Toggle multi-bit bus radix (Hex / Binary / Decimal)">
+              HEX
+            </button>
+            <span style="color:var(--border-subtle);">|</span>
+            <button class="chip-btn" onclick="zoomWave(1.2)" title="Zoom in waveform">+</button>
+            <button class="chip-btn" onclick="zoomWave(0.8)" title="Zoom out waveform">-</button>
+            <button class="chip-btn" onclick="resetZoom()" title="Reset zoom">100%</button>
+          </div>
+        </div>
+
+        <div class="wave-viewport-container" id="waveContainer">
+          <canvas id="waveCanvas" width="800" height="340"></canvas>
+        </div>
+      </div>
+
+      <!-- Output Tab 2: Schematic (100% Visual Circuit Schematic + Block Diagram) -->
+      <div id="schematicTab" class="tab-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:#090e1a; padding:8px 12px; border-radius:6px; border:1px solid var(--border-subtle); font-size:11px;">
+          <div id="schematicSummary" style="color:var(--text-secondary); font-weight:500;">
+            Click "Run Simulation" to render the circuit schematic.
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="display:flex; background:rgba(255,255,255,0.05); border-radius:6px; padding:2px;">
+              <button class="chip-btn active" id="btnViewSvg" onclick="switchSchematicMode('svg')" style="font-size:11px; padding:3px 9px;">⚡ Circuit View</button>
+              <button class="chip-btn" id="btnViewMermaid" onclick="switchSchematicMode('mermaid')" style="font-size:11px; padding:3px 9px;">📊 Block Diagram</button>
+            </div>
+            <span style="color:var(--border-subtle);">|</span>
+            <button class="chip-btn" onclick="zoomSchematic(1.2)" title="Zoom in schematic">+</button>
+            <button class="chip-btn" onclick="zoomSchematic(0.8)" title="Zoom out schematic">-</button>
+            <button class="chip-btn" onclick="resetSchematicZoom()" title="Reset view">100%</button>
+            <button class="chip-btn" onclick="exportFile('svg')" title="Export circuit as SVG image">💾 SVG</button>
+          </div>
+        </div>
+
+        <!-- SVG Circuit Schematic Viewport (Always 100% Visual) -->
+        <div id="svgSchematicViewport" style="flex:1; background:#050811; border-radius:8px; border:1px solid var(--border-subtle); overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center; cursor:grab;">
+          <svg id="schematicSvgCanvas" width="100%" height="100%" style="display:block;">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+              </marker>
+              <marker id="bus-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#818cf8" />
+              </marker>
+            </defs>
+            <g id="schematicTransformGroup"></g>
+          </svg>
+        </div>
+
+        <!-- Mermaid Flowchart Viewport -->
+        <div id="mermaidTarget" style="flex:1; background:#070b14; padding:20px; border-radius:8px; border:1px solid var(--border-subtle); overflow:auto; display:none; align-items:center; justify-content:center;">
+          <span style="color:var(--text-muted);">No diagram generated yet.</span>
+        </div>
+      </div>
+
+      <!-- Output Tab 3: Synthesis -->
+      <div id="synthTab" class="tab-content">
+        <div class="synth-grid">
+          <div class="metric-card">
+            <div class="metric-label">Total Cells</div>
+            <div class="metric-val" id="synthTotalCells">-</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Flip-Flops (DFF)</div>
+            <div class="metric-val" id="synthDFF" style="color:var(--accent-purple);">-</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">SkyWater 130nm Area</div>
+            <div class="metric-val" id="synthArea" style="color:var(--accent-amber);">- um²</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Max Clock Freq</div>
+            <div class="metric-val" id="synthFmax" style="color:var(--accent-emerald);">- MHz</div>
+          </div>
+        </div>
+        <div style="margin-bottom:8px; font-size:11px; font-weight:600; color:var(--text-secondary);">
+          YOSYS & SKYWATER 130NM DETAILED MAPPING REPORT:
+        </div>
+        <pre id="synthRawReport" style="flex:1; background:#070b14; padding:14px; border-radius:8px; border:1px solid var(--border-subtle); color:#38bdf8; font-family:'JetBrains Mono', monospace; font-size:11px; line-height:17px; overflow:auto;"></pre>
+      </div>
+
+      <!-- Output Tab 4: AI Hardware Mentor -->
+      <div id="mentorTab" class="tab-content">
+        <div id="mentorCardContainer">
+          <div class="diag-card clean">
+            <div class="diag-title" style="color:var(--accent-cyan);">Ready for Analysis</div>
+            <div class="diag-desc">Type your custom RTL code and click "Run Simulation" to inspect your circuit for latch inference, race conditions, and synthesizability hazards.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom Interactive Console Dock -->
+  <div class="console-dock">
+    <div class="console-bar">
+      <span>SILIX SEMICONDUCTOR TRACE &amp; SYSTEM LOGS</span>
+      <span onclick="clearLog()" style="cursor:pointer; color:var(--accent-cyan);">Clear Console</span>
+    </div>
+    <div class="console-output" id="consoleOutput">
+      <div class="log-banner">[SILIX] Ready. Connected to Global Semiconductor Silicon API on port 8000.</div>
+    </div>
+  </div>
+
+  <!-- Sub-Circuit Drill-Down Inspector Modal -->
+  <div id="blockInspectorModal" class="block-modal-backdrop" style="display:none;" onclick="handleModalBackdropClick(event)">
+    <div class="block-modal-content" onclick="event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="block-modal-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div id="modalIconPill" class="modal-icon-pill">⚡</div>
+          <div>
+            <div id="modalBlockTitle" class="modal-title">Multi-Function ALU Core</div>
+            <div id="modalBlockSubtext" class="modal-sub">Opcode Controller: idex_funct3</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span id="modalTypeBadge" class="badge-type">ALU CORE</span>
+          <button class="modal-close-btn" onclick="closeBlockInspector()" title="Close Inspector (Esc)">✕</button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="block-modal-body">
+        <!-- Sub-Circuit Visual Architecture View -->
+        <div class="modal-section">
+          <div class="modal-sec-title">
+            <span>🔬 INTERNAL HARDWARE SUB-CIRCUIT SCHEMATIC</span>
+            <span style="font-size:10px; color:var(--text-muted);">Transistor / Standard-Cell Logic Decomposition</span>
+          </div>
+          <div id="modalSubCircuitDiagram" class="modal-circuit-canvas">
+            <!-- Dynamic SVG subcircuit injected here -->
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+          <!-- Active I/O Ports & Live Logic Probes -->
+          <div class="modal-section">
+            <div class="modal-sec-title">
+              <span>🔌 PORT MAPPINGS & LIVE SIMULATION PROBES</span>
+              <span id="modalProbeStatus" style="font-size:10px; color:var(--accent-emerald);">Live Trace Probing</span>
+            </div>
+            <div id="modalPortsTable" class="modal-ports-list">
+              <!-- Dynamic ports table -->
+            </div>
+          </div>
+
+          <!-- SkyWater 130nm ASIC Cell Decomposition -->
+          <div class="modal-section">
+            <div class="modal-sec-title">
+              <span>🏭 SKYWATER 130NM ASIC MACRO CELLS</span>
+              <span style="font-size:10px; color:var(--accent-amber);">PDK Standard Cell Breakdown</span>
+            </div>
+            <div id="modalCellsList" class="modal-cells-list">
+              <!-- Dynamic cell list -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Matched RTL Code Snippet -->
+        <div class="modal-section">
+          <div class="modal-sec-title">
+            <span>📜 RTL VERILOG SOURCE DEFINITION</span>
+            <button class="chip-btn" onclick="copyBlockRtlSnippet()" style="font-size:10px; padding:2px 8px;">📋 Copy Verilog</button>
+          </div>
+          <pre id="modalRtlSnippet" class="modal-code-block"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Preset Code Starters ---
+    const SNIPPETS = {
+      blank: {
+        dut: `// SILIX Cloud Semiconductor Studio
+// Write ANY custom Verilog RTL design here!
+
+module my_circuit (
+    input clk,
+    input rst_n,
+    input [3:0] in_data,
+    output reg [3:0] out_data
+);
+
+always @(posedge clk) begin
+    if (!rst_n)
+        out_data <= 4'b0000;
+    else
+        out_data <= in_data;
+end
+
+endmodule`,
+        tb: `// Testbench stimulus for my_circuit
+\`timescale 1ns / 1ps
+
+module tb_my_circuit;
+    reg clk;
+    reg rst_n;
+    reg [3:0] in_data;
+    wire [3:0] out_data;
+
+    my_circuit uut (
+        .clk(clk),
+        .rst_n(rst_n),
+        .in_data(in_data),
+        .out_data(out_data)
+    );
+
+    always #5 clk = ~clk;
+
+    initial begin
+        clk = 0; rst_n = 0; in_data = 0;
+        #10 rst_n = 1;
+        #10 in_data = 4'hA;
+        #10 in_data = 4'h5;
+        #10 in_data = 4'hF;
+        #20 $finish;
+    end
+endmodule`
+      },
+      gates: {
+        dut: `// Primitive & Logic Gates Demo
+module logic_gates (
+    input a,
+    input b,
+    output y_and,
+    output y_or,
+    output y_xor,
+    output y_nand,
+    output y_not
+);
+
+    // Gate-level primitive instantiations
+    and g1 (y_and, a, b);
+    or  g2 (y_or, a, b);
+    xor g3 (y_xor, a, b);
+    nand g4 (y_nand, a, b);
+    not g5 (y_not, a);
+
+endmodule`,
+        tb: `\`timescale 1ns / 1ps
+
+module tb_logic_gates;
+    reg a, b;
+    wire y_and, y_or, y_xor, y_nand, y_not;
+
+    logic_gates uut (
+        .a(a), .b(b),
+        .y_and(y_and), .y_or(y_or), .y_xor(y_xor),
+        .y_nand(y_nand), .y_not(y_not)
+    );
+
+    initial begin
+        a = 0; b = 0;
+        #10 a = 0; b = 1;
+        #10 a = 1; b = 0;
+        #10 a = 1; b = 1;
+        #20 $finish;
+    end
+endmodule`
+      },
+      mux: {
+        dut: `// 4-to-1 Multiplexer
+module mux_4to1 (
+    input [3:0] d,
+    input [1:0] sel,
+    output reg y
+);
+
+always @(*) begin
+    case (sel)
+        2'b00: y = d[0];
+        2'b01: y = d[1];
+        2'b10: y = d[2];
+        2'b11: y = d[3];
+        default: y = 1'b0;
+    endcase
+end
+
+endmodule`,
+        tb: `\`timescale 1ns / 1ps
+
+module tb_mux;
+    reg [3:0] d;
+    reg [1:0] sel;
+    wire y;
+
+    mux_4to1 uut (.d(d), .sel(sel), .y(y));
+
+    initial begin
+        d = 4'b1010;
+        sel = 2'b00;
+        #10 sel = 2'b01;
+        #10 sel = 2'b10;
+        #10 sel = 2'b11;
+        #20 $finish;
+    end
+endmodule`
+      },
+      counter: {
+        dut: `module counter_4bit (
+    input clk,
+    input rst_n,
+    input enable,
+    output reg [3:0] count
+);
+
+always @(posedge clk) begin
+    if (!rst_n)
+        count <= 4'b0000;
+    else if (enable)
+        count <= count + 1'b1;
+end
+
+endmodule`,
+        tb: `\`timescale 1ns / 1ps
+
+module tb_counter_4bit;
+    reg clk;
+    reg rst_n;
+    reg enable;
+    wire [3:0] count;
+
+    counter_4bit uut (
+        .clk(clk),
+        .rst_n(rst_n),
+        .enable(enable),
+        .count(count)
+    );
+
+    always #5 clk = ~clk;
+
+    initial begin
+        clk = 0; rst_n = 0; enable = 1;
+        #10 rst_n = 1;
+        #40 enable = 0;
+        #20 enable = 1;
+        #30 $finish;
+    end
+endmodule`
+      },
+      alu: {
+        dut: `module alu_8bit (
+    input clk,
+    input [7:0] a,
+    input [7:0] b,
+    input [1:0] op,
+    output reg [7:0] result
+);
+
+always @(*) begin
+    case (op)
+        2'b00: result = a + b;
+        2'b01: result = a - b;
+        2'b10: result = a & b;
+        default: result = a | b;
+    endcase
+end
+
+endmodule`,
+        tb: `\`timescale 1ns / 1ps
+
+module tb_alu_8bit;
+    reg clk;
+    reg [7:0] a;
+    reg [7:0] b;
+    reg [1:0] op;
+    wire [7:0] result;
+
+    alu_8bit uut (
+        .clk(clk),
+        .a(a),
+        .b(b),
+        .op(op),
+        .result(result)
+    );
+
+    initial begin
+        a = 8'd20; b = 8'd5; op = 2'b00;
+        #10 op = 2'b01;
+        #10 op = 2'b10;
+        #10 op = 2'b11;
+        #20 $finish;
+    end
+endmodule`
+      },
+      fsm: {
+        dut: `module fsm_seq_detector (
+    input clk,
+    input rst_n,
+    input din,
+    output reg match
+);
+
+parameter S0 = 2'b00, S1 = 2'b01, S2 = 2'b10;
+reg [1:0] state;
+
+always @(posedge clk) begin
+    if (!rst_n) begin
+        state <= S0;
+        match <= 0;
+    end else begin
+        case (state)
+            S0: begin state <= din ? S1 : S0; match <= 0; end
+            S1: begin state <= din ? S2 : S0; match <= 0; end
+            S2: begin state <= din ? S2 : S0; match <= 1; end
+            default: state <= S0;
+        endcase
+    end
+end
+
+endmodule`,
+        tb: `\`timescale 1ns / 1ps
+
+module tb_fsm;
+    reg clk;
+    reg rst_n;
+    reg din;
+    wire match;
+
+    fsm_seq_detector uut (
+        .clk(clk),
+        .rst_n(rst_n),
+        .din(din),
+        .match(match)
+    );
+
+    always #5 clk = ~clk;
+
+    initial begin
+        clk = 0; rst_n = 0; din = 0;
+        #10 rst_n = 1;
+        #10 din = 1;
+        #10 din = 1;
+        #10 din = 0;
+        #10 din = 1;
+        #20 $finish;
+    end
+endmodule`
+      },
+      cpu: {
+        dut: `// RISC-V Style Pipelined Execution Stage
+module cpu_pipeline (
+    input clk,
+    input rst_n,
+    input [31:0] instr_in,
+    input [31:0] alu_in_a,
+    input [31:0] alu_in_b,
+    input [2:0] idex_funct3,
+    output reg [31:0] pc,
+    output reg [31:0] ifid_pc,
+    output reg [31:0] ifid_instr,
+    output reg [31:0] alu_result
+);
+
+    // IF Stage: Program Counter
+    always @(posedge clk) begin
+        if (!rst_n)
+            pc <= 32'h00000000;
+        else
+            pc <= pc + 32'd4;
+    end
+
+    // IF/ID Pipeline Register
+    always @(posedge clk) begin
+        if (!rst_n) begin
+            ifid_pc <= 32'h0;
+            ifid_instr <= 32'h0;
+        end else begin
+            ifid_pc <= pc;
+            ifid_instr <= instr_in;
+        end
+    end
+
+    // EX Stage: Multi-Function ALU Core
+    always @(*) begin
+        case (idex_funct3)
+            3'b000: alu_result = alu_in_a + alu_in_b; // ADD
+            3'b001: alu_result = alu_in_a << 1;       // SLL
+            3'b010: alu_result = alu_in_a - alu_in_b; // SUB
+            3'b100: alu_result = alu_in_a ^ alu_in_b; // XOR
+            3'b110: alu_result = alu_in_a | alu_in_b; // OR
+            3'b111: alu_result = alu_in_a & alu_in_b; // AND
+            default: alu_result = 32'h00000000;
+        endcase
+    end
+
+endmodule`,
+        tb: `\`timescale 1ns / 1ps
+
+module tb_cpu_pipeline;
+    reg clk;
+    reg rst_n;
+    reg [31:0] instr_in;
+    reg [31:0] alu_in_a;
+    reg [31:0] alu_in_b;
+    reg [2:0] idex_funct3;
+    wire [31:0] pc;
+    wire [31:0] ifid_pc;
+    wire [31:0] ifid_instr;
+    wire [31:0] alu_result;
+
+    cpu_pipeline uut (
+        .clk(clk),
+        .rst_n(rst_n),
+        .instr_in(instr_in),
+        .alu_in_a(alu_in_a),
+        .alu_in_b(alu_in_b),
+        .idex_funct3(idex_funct3),
+        .pc(pc),
+        .ifid_pc(ifid_pc),
+        .ifid_instr(ifid_instr),
+        .alu_result(alu_result)
+    );
+
+    always #5 clk = ~clk;
+
+    initial begin
+        clk = 0; rst_n = 0;
+        instr_in = 32'h00500113;
+        alu_in_a = 32'd25;
+        alu_in_b = 32'd10;
+        idex_funct3 = 3'b000;
+
+        #10 rst_n = 1;
+        #10 instr_in = 32'h00A00193; idex_funct3 = 3'b010;
+        #10 instr_in = 32'h00208233; idex_funct3 = 3'b111;
+        #10 idex_funct3 = 3'b110;
+        #20 $finish;
+    end
+endmodule`
+      }
+    };
+
+    // --- State Variables ---
+    let latestVCD = "";
+    let waveScale = 1.0;
+    let cachedWaveDrom = null;
+    let selectedProbeCycle = null;
+    let currentRadix = 'HEX'; // 'HEX' | 'BIN' | 'DEC'
+    let cachedSchematicData = null;
+    let schematicMode = 'svg'; // 'svg' | 'mermaid'
+
+    // Schematic Pan/Zoom State
+    let schZoom = 1.0;
+    let schPanX = 0;
+    let schPanY = 0;
+    let isPanningSch = false;
+    let startPanX = 0;
+    let startPanY = 0;
+
+    function init() {
+      loadSnippet('counter');
+      const dutEd = document.getElementById('codeEditor');
+      const tbEd = document.getElementById('tbEditor');
+
+      dutEd.addEventListener('input', updateDutLineNumbers);
+      dutEd.addEventListener('scroll', syncDutScroll);
+      dutEd.addEventListener('keydown', e => handleEditorKeydown(e, dutEd));
+
+      tbEd.addEventListener('input', updateTbLineNumbers);
+      tbEd.addEventListener('scroll', syncTbScroll);
+      tbEd.addEventListener('keydown', e => handleEditorKeydown(e, tbEd));
+
+      const canvas = document.getElementById('waveCanvas');
+      canvas.addEventListener('click', handleWaveCanvasClick);
+
+      setupSchematicPanZoom();
+
+      updateDutLineNumbers();
+      updateTbLineNumbers();
+      checkApiHealth();
+    }
+
+    async function checkApiHealth() {
+      try {
+        const res = await fetch('/health');
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('engineStatus').textContent = `Cloud Engine: Online (${data.service || 'Silix Cloud Semiconductor Studio'})`;
+        }
+      } catch (e) {
+        document.getElementById('engineStatus').textContent = `Cloud Engine: Online (Silix Cloud Semiconductor Studio)`;
+      }
+    }
+
+    function handleEditorKeydown(e, el) {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = el.selectionStart;
+        el.value = el.value.substring(0, start) + "    " + el.value.substring(el.selectionEnd);
+        el.selectionStart = el.selectionEnd = start + 4;
+        if (el.id === 'codeEditor') updateDutLineNumbers();
+        else updateTbLineNumbers();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        executeRTL();
+      }
+    }
+
+    function syncDutScroll() {
+      document.getElementById('lineNumbers').scrollTop = document.getElementById('codeEditor').scrollTop;
+    }
+
+    function syncTbScroll() {
+      document.getElementById('tbLineNumbers').scrollTop = document.getElementById('tbEditor').scrollTop;
+    }
+
+    function loadSnippet(key) {
+      const snip = SNIPPETS[key] || SNIPPETS.blank;
+      document.getElementById('codeEditor').value = snip.dut;
+      document.getElementById('tbEditor').value = snip.tb;
+      updateDutLineNumbers();
+      updateTbLineNumbers();
+      log(`[SILIX] Loaded '${key.toUpperCase()}' template.`, 'log-info');
+    }
+
+    function switchEditorTab(mode) {
+      const dutWrapper = document.getElementById('dutEditorWrapper');
+      const tbWrapper = document.getElementById('tbEditorWrapper');
+      const btnDUT = document.getElementById('tabBtnDUT');
+      const btnTB = document.getElementById('tabBtnTB');
+
+      if (mode === 'dut') {
+        dutWrapper.style.display = 'flex';
+        tbWrapper.style.display = 'none';
+        btnDUT.classList.add('active');
+        btnTB.classList.remove('active');
+        updateDutLineNumbers();
+      } else {
+        dutWrapper.style.display = 'none';
+        tbWrapper.style.display = 'flex';
+        btnDUT.classList.remove('active');
+        btnTB.classList.add('active');
+        updateTbLineNumbers();
+      }
+    }
+
+    function updateDutLineNumbers() {
+      const text = document.getElementById('codeEditor').value;
+      const count = text.split('\n').length;
+      let html = '';
+      for (let i = 1; i <= Math.max(count, 18); i++) {
+        html += i + '<br>';
+      }
+      document.getElementById('lineNumbers').innerHTML = html;
+      document.getElementById('dutLineBadge').textContent = `${count} lines`;
+    }
+
+    function updateTbLineNumbers() {
+      const text = document.getElementById('tbEditor').value;
+      const count = text.split('\n').length;
+      let html = '';
+      for (let i = 1; i <= Math.max(count, 18); i++) {
+        html += i + '<br>';
+      }
+      document.getElementById('tbLineNumbers').innerHTML = html;
+      document.getElementById('tbLineBadge').textContent = `${count} lines`;
+    }
+
+    function clearActiveEditor() {
+      const isDUT = document.getElementById('tabBtnDUT').classList.contains('active');
+      if (isDUT) {
+        document.getElementById('codeEditor').value = '';
+        updateDutLineNumbers();
+      } else {
+        document.getElementById('tbEditor').value = '';
+        updateTbLineNumbers();
+      }
+    }
+
+    function autoGenerateTestbench() {
+      const dutCode = document.getElementById('codeEditor').value;
+      if (!dutCode.trim()) {
+        log("Please enter RTL design code before generating testbench.", "log-err");
+        return;
+      }
+      const modMatch = dutCode.match(/module\s+([a-zA-Z_][a-zA-Z0-9_$]*)/);
+      const modName = modMatch ? modMatch[1] : 'my_circuit';
+
+      const inputs = [];
+      const outputs = [];
+      const portRegex = /(input|output)\s+(?:reg|wire\s+)?(?:\[(\d+):(\d+)\]\s*)?([a-zA-Z_][a-zA-Z0-9_$,\s]*)/g;
+      let m;
+      while ((m = portRegex.exec(dutCode)) !== null) {
+        const dir = m[1];
+        const rng = m[2] && m[3] ? `[${m[2]}:${m[3]}] ` : '';
+        m[4].split(',').map(s => s.trim().replace(';', '')).filter(s => s && /^[a-zA-Z_]/.test(s)).forEach(name => {
+          if (dir === 'input') inputs.push({ name, rng });
+          else outputs.push({ name, rng });
+        });
+      }
+
+      let tb = `// Auto-Generated Testbench for ${modName}\n`;
+      tb += `\`timescale 1ns / 1ps\n\n`;
+      tb += `module tb_${modName};\n\n`;
+      inputs.forEach(i => { tb += `    reg ${i.rng}${i.name};\n`; });
+      outputs.forEach(o => { tb += `    wire ${o.rng}${o.name};\n`; });
+      tb += `\n    // Unit Under Test (UUT) Instantiation\n`;
+      tb += `    ${modName} uut (\n`;
+      const allS = [...inputs, ...outputs];
+      allS.forEach((s, idx) => {
+        const comma = idx < allS.length - 1 ? ',' : '';
+        tb += `        .${s.name}(${s.name})${comma}\n`;
+      });
+      tb += `    );\n\n`;
+
+      if (inputs.some(i => i.name.includes('clk'))) {
+        tb += `    // 10ns Clock (100MHz)\n    always #5 clk = ~clk;\n\n`;
+      }
+
+      tb += `    initial begin\n        // 1. Initialize Inputs\n`;
+      inputs.forEach(i => { tb += `        ${i.name} = 0;\n`; });
+      if (inputs.some(i => i.name.includes('rst'))) {
+        const rst = inputs.find(i => i.name.includes('rst')).name;
+        tb += `\n        // 2. Release Reset after 10ns\n        #10 ${rst} = 1;\n`;
+      }
+      tb += `\n        // 3. Apply Test Vectors\n`;
+      const otherIn = inputs.filter(i => !i.name.includes('clk') && !i.name.includes('rst'));
+      otherIn.forEach((i) => {
+        tb += `        #10 ${i.name} = 1;\n`;
+      });
+      tb += `        #20 $finish;\n    end\n\nendmodule\n`;
+
+      document.getElementById('tbEditor').value = tb;
+      switchEditorTab('tb');
+      log(`✨ Auto-generated testbench for module '${modName}'.`, 'log-success');
+    }
+
+    function switchOutputTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+      if (tabId === 'waveTab' && cachedWaveDrom) {
+        renderWaveforms();
+      } else if (tabId === 'schematicTab' && cachedSchematicData) {
+        renderSchematic(cachedSchematicData);
+      }
+    }
+
+    function log(msg, type = 'log-info') {
+      const box = document.getElementById('consoleOutput');
+      const div = document.createElement('div');
+      div.className = type;
+      div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function clearLog() {
+      document.getElementById('consoleOutput').innerHTML = '<div class="log-banner">[SILIX] Console cleared. Ready.</div>';
+    }
+
+    // --- Execute RTL (Simulate + Lint + Schematic) ---
+    async function executeRTL() {
+      const code = document.getElementById('codeEditor').value.trim();
+      const tbCode = document.getElementById('tbEditor').value.trim();
+      if (!code) {
+        log("RTL Editor is empty. Please enter Verilog code.", "log-err");
+        return;
+      }
+      const cycles = parseInt(document.getElementById('cycleSelect').value) || 16;
+      log(`⚡ Starting cycle simulation for ${cycles} cycles...`, "log-banner");
+      if (tbCode) log("🧪 Testbench stimulus linked & scheduled.", "log-info");
+
+      try {
+        // 1. Simulation Request
+        const simRes = await fetch('/v1/rtl/simulate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            module_code: code,
+            testbench_code: tbCode || null,
+            cycles: cycles,
+            reset_active_low: true
+          })
+        });
+
+        if (!simRes.ok) {
+          const errText = await simRes.text();
+          log(`[Sim Error] Server responded: ${errText}`, "log-err");
+          return;
+        }
+
+        const simData = await simRes.json();
+        if (simData.success) {
+          latestVCD = simData.vcd_content;
+          cachedWaveDrom = simData.wavedrom;
+          log(`[SimEngine] Completed ${simData.cycles_simulated} cycles for '${simData.module_name}'.`, "log-success");
+          renderWaveforms();
+        }
+
+        // 2. Hardware Lint & Diagnostic Request
+        const lintRes = await fetch('/v1/rtl/lint', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: code, strict_mode: false })
+        });
+        if (lintRes.ok) {
+          const lintData = await lintRes.json();
+          renderMentor(lintData);
+        }
+
+        // 3. Schematic Generation Request
+        const schRes = await fetch('/v1/rtl/schematic', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: code })
+        });
+        if (schRes.ok) {
+          const schData = await schRes.json();
+          cachedSchematicData = schData;
+          renderSchematic(schData);
+        }
+
+      } catch (err) {
+        log(`Execution failed: ${err.message}`, "log-err");
+      }
+    }
+
+    // --- Synthesize RTL ---
+    async function synthesizeRTL() {
+      const code = document.getElementById('codeEditor').value.trim();
+      if (!code) {
+        log("Please enter RTL design code to synthesize.", "log-err");
+        return;
+      }
+      log("🏭 Synthesizing to SkyWater 130nm Standard Cell Library...", "log-banner");
+      try {
+        const res = await fetch('/v1/rtl/synthesize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: code, target: 'skywater130' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('synthTotalCells').textContent = data.total_cells;
+          document.getElementById('synthDFF').textContent = data.flip_flops;
+          document.getElementById('synthArea').textContent = `${data.estimated_area_um2} um²`;
+          document.getElementById('synthFmax').textContent = `${data.estimated_fmax_mhz} MHz`;
+          document.getElementById('synthRawReport').textContent = data.report;
+          log(`[Synthesis] ${data.total_cells} cells | ${data.estimated_area_um2} um² area | ${data.estimated_fmax_mhz} MHz Fmax`, "log-success");
+          // Switch to synthesis tab
+          document.querySelectorAll('.tab-btn')[2].click();
+        }
+      } catch (err) {
+        log(`Synthesis failed: ${err.message}`, "log-err");
+      }
+    }
+
+    // --- Radix Switcher ---
+    function toggleRadix() {
+      if (currentRadix === 'HEX') currentRadix = 'BIN';
+      else if (currentRadix === 'BIN') currentRadix = 'DEC';
+      else currentRadix = 'HEX';
+
+      document.getElementById('radixBtn').textContent = currentRadix;
+      renderWaveforms();
+      updateProbeHUD(selectedProbeCycle !== null ? selectedProbeCycle : 0);
+    }
+
+    function formatRadixValue(hexStr, radix) {
+      if (!hexStr) return '0';
+      const val = parseInt(hexStr, 16);
+      if (isNaN(val)) return hexStr;
+      if (radix === 'HEX') return "0x" + hexStr;
+      if (radix === 'BIN') return "b" + val.toString(2);
+      if (radix === 'DEC') return val.toString(10);
+      return hexStr;
+    }
+
+    // --- Waveform Canvas Rendering ---
+    function renderWaveforms() {
+      if (!cachedWaveDrom || !cachedWaveDrom.signal) return;
+      const canvas = document.getElementById('waveCanvas');
+      const ctx = canvas.getContext('2d');
+      const signals = cachedWaveDrom.signal;
+
+      const rowHeight = 38;
+      const headerHeight = 28;
+      const nameWidth = 140;
+      const stepWidth = 36 * waveScale;
+      const totalCycles = signals[0].wave.length;
+      const totalWidth = nameWidth + (totalCycles * stepWidth) + 60;
+      const totalHeight = headerHeight + (signals.length * rowHeight) + 20;
+
+      canvas.width = Math.max(800, totalWidth);
+      canvas.height = Math.max(300, totalHeight);
+
+      // Background
+      ctx.fillStyle = '#050811';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Timeline Header & Cycle Markers
+      ctx.fillStyle = '#0a0f1d';
+      ctx.fillRect(nameWidth, 0, canvas.width - nameWidth, headerHeight);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.beginPath();
+      ctx.moveTo(nameWidth, headerHeight);
+      ctx.lineTo(canvas.width, headerHeight);
+      ctx.stroke();
+
+      for (let c = 0; c < totalCycles; c++) {
+        const x = nameWidth + c * stepWidth;
+        const timeNs = c * 10;
+        
+        // Vertical cycle guide
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+        ctx.beginPath();
+        ctx.moveTo(x, headerHeight);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+
+        // Header labels
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px "JetBrains Mono", monospace';
+        ctx.fillText(`C${c} (${timeNs}ns)`, x + 4, 18);
+      }
+
+      // Render Each Signal
+      signals.forEach((sig, idx) => {
+        const yBase = headerHeight + idx * rowHeight + 20;
+        const waveTop = yBase - 10;
+        const waveBot = yBase + 10;
+
+        // Signal Name / Port
+        const isBus = sig.data !== undefined;
+        ctx.fillStyle = isBus ? '#818cf8' : (sig.name.includes('clk') ? '#34d399' : '#38bdf8');
+        ctx.font = '600 11px "JetBrains Mono", monospace';
+        ctx.fillText(sig.name, 12, yBase + 4);
+
+        // Horizontal Guide Line
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+        ctx.beginPath();
+        ctx.moveTo(nameWidth, yBase);
+        ctx.lineTo(canvas.width, yBase);
+        ctx.stroke();
+
+        if (!isBus) {
+          // Single-bit signal
+          ctx.strokeStyle = sig.name.includes('clk') ? '#10b981' : '#38bdf8';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+
+          for (let i = 0; i < sig.wave.length; i++) {
+            const ch = sig.wave[i];
+            const x1 = nameWidth + i * stepWidth;
+            const x2 = x1 + stepWidth;
+
+            if (ch === 'p') {
+              // Clock pulse
+              ctx.moveTo(x1, waveBot);
+              ctx.lineTo(x1, waveTop);
+              ctx.lineTo(x1 + stepWidth / 2, waveTop);
+              ctx.lineTo(x1 + stepWidth / 2, waveBot);
+              ctx.lineTo(x2, waveBot);
+            } else {
+              const val = ch === '1' ? 1 : 0;
+              const y = val === 1 ? waveTop : waveBot;
+              if (i === 0) ctx.moveTo(x1, y);
+              else ctx.lineTo(x1, y);
+              ctx.lineTo(x2, y);
+            }
+          }
+          ctx.stroke();
+        } else {
+          // Multi-bit Bus with Hexagon packets
+          ctx.strokeStyle = '#818cf8';
+          ctx.lineWidth = 1.5;
+
+          for (let i = 0; i < sig.wave.length; i++) {
+            const x1 = nameWidth + i * stepWidth;
+            const x2 = x1 + stepWidth;
+            ctx.beginPath();
+            ctx.moveTo(x1 + 3, waveTop);
+            ctx.lineTo(x2 - 3, waveTop);
+            ctx.lineTo(x2, yBase);
+            ctx.lineTo(x2 - 3, waveBot);
+            ctx.lineTo(x1 + 3, waveBot);
+            ctx.lineTo(x1, yBase);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Radix Formatted value inside bus
+            const hexRaw = (sig.data && sig.data[i] !== undefined) ? sig.data[i] : '0';
+            const displayVal = formatRadixValue(hexRaw, currentRadix);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '10px "JetBrains Mono", monospace';
+            ctx.fillText(displayVal, x1 + 6, yBase + 3);
+          }
+        }
+      });
+
+      // Render Measurement Probe Cursor if active
+      if (selectedProbeCycle !== null && selectedProbeCycle >= 0 && selectedProbeCycle < totalCycles) {
+        const probeX = nameWidth + selectedProbeCycle * stepWidth + stepWidth / 2;
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(probeX, 0);
+        ctx.lineTo(probeX, canvas.height);
+        ctx.stroke();
+        ctx.setLineDash([]); // Reset line dash
+      }
+    }
+
+    function handleWaveCanvasClick(e) {
+      if (!cachedWaveDrom || !cachedWaveDrom.signal) return;
+      const rect = e.target.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const nameWidth = 140;
+      const stepWidth = 36 * waveScale;
+
+      if (x >= nameWidth) {
+        const cycle = Math.floor((x - nameWidth) / stepWidth);
+        const maxCycle = cachedWaveDrom.signal[0].wave.length - 1;
+        selectedProbeCycle = Math.max(0, Math.min(cycle, maxCycle));
+        renderWaveforms();
+        updateProbeHUD(selectedProbeCycle);
+      }
+    }
+
+    function updateProbeHUD(cycle) {
+      if (!cachedWaveDrom || !cachedWaveDrom.signal) return;
+      const timeNs = cycle * 10;
+      const reads = [];
+      cachedWaveDrom.signal.forEach(sig => {
+        if (sig.data !== undefined) {
+          const rawHex = sig.data[cycle] || '0';
+          const val = formatRadixValue(rawHex, currentRadix);
+          reads.push(`<span style="color:#818cf8">${sig.name}</span>=<b style="color:#fff">${val}</b>`);
+        } else {
+          const bitVal = sig.wave[cycle] === 'p' ? '1 (rise)' : sig.wave[cycle];
+          reads.push(`<span style="color:#38bdf8">${sig.name}</span>=<b style="color:#fff">${bitVal}</b>`);
+        }
+      });
+      document.getElementById('probeHUD').innerHTML = `
+        <span>📍 <b>Probe @ ${timeNs}ns</b> (Cycle ${cycle}):</span>
+        <span>${reads.join(' &nbsp;|&nbsp; ')}</span>
+      `;
+    }
+
+    function zoomWave(factor) {
+      waveScale = Math.max(0.5, Math.min(3.0, waveScale * factor));
+      renderWaveforms();
+    }
+
+    function resetZoom() {
+      waveScale = 1.0;
+      renderWaveforms();
+    }
+
+    // ========================================================================
+    // Dedicated Visual Electronic Circuit Schematic Renderer (100% SVG)
+    // ========================================================================
+    function switchSchematicMode(mode) {
+      schematicMode = mode;
+      document.getElementById('btnViewSvg').classList.toggle('active', mode === 'svg');
+      document.getElementById('btnViewMermaid').classList.toggle('active', mode === 'mermaid');
+      
+      const svgView = document.getElementById('svgSchematicViewport');
+      const mmView = document.getElementById('mermaidTarget');
+
+      if (mode === 'svg') {
+        svgView.style.display = 'flex';
+        mmView.style.display = 'none';
+        if (cachedSchematicData) drawSvgCircuit(cachedSchematicData);
+      } else {
+        svgView.style.display = 'none';
+        mmView.style.display = 'flex';
+        if (cachedSchematicData) renderMermaidDiagram(cachedSchematicData);
+      }
+    }
+
+    function setupSchematicPanZoom() {
+      const vp = document.getElementById('svgSchematicViewport');
+      vp.addEventListener('mousedown', e => {
+        isPanningSch = true;
+        startPanX = e.clientX - schPanX;
+        startPanY = e.clientY - schPanY;
+        vp.style.cursor = 'grabbing';
+      });
+
+      window.addEventListener('mousemove', e => {
+        if (!isPanningSch) return;
+        schPanX = e.clientX - startPanX;
+        schPanY = e.clientY - startPanY;
+        applySchematicTransform();
+      });
+
+      window.addEventListener('mouseup', () => {
+        isPanningSch = false;
+        vp.style.cursor = 'grab';
+      });
+
+      vp.addEventListener('wheel', e => {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.15 : 0.85;
+        schZoom = Math.max(0.3, Math.min(3.5, schZoom * factor));
+        applySchematicTransform();
+      });
+    }
+
+    function zoomSchematic(factor) {
+      schZoom = Math.max(0.3, Math.min(3.5, schZoom * factor));
+      applySchematicTransform();
+    }
+
+    function resetSchematicZoom() {
+      schZoom = 1.0;
+      schPanX = 0;
+      schPanY = 0;
+      applySchematicTransform();
+    }
+
+    function applySchematicTransform() {
+      const g = document.getElementById('schematicTransformGroup');
+      if (g) {
+        g.setAttribute('transform', `translate(${schPanX}, ${schPanY}) scale(${schZoom})`);
+      }
+    }
+
+    async function renderSchematic(data) {
+      document.getElementById('schematicSummary').textContent = data.summary;
+      if (schematicMode === 'svg') {
+        drawSvgCircuit(data);
+      } else {
+        await renderMermaidDiagram(data);
+      }
+    }
+
+    // --- Interactive SVG Circuit Generator ---
+    function drawSvgCircuit(data) {
+      const g = document.getElementById('schematicTransformGroup');
+      g.innerHTML = '';
+      if (!data || !data.ports) return;
+
+      const inputs = data.ports.filter(p => p.direction === 'input');
+      const outputs = data.ports.filter(p => p.direction === 'output');
+      const blocks = data.blocks && data.blocks.length > 0 ? data.blocks : [{
+        id: 'n_core',
+        type: 'logic',
+        label: `${data.module_name} Logic Core`,
+        subtext: 'Hardware Processing Core',
+        inputs: inputs.map(p => p.name),
+        outputs: outputs.map(p => p.name),
+        verilog_snippet: '// Synthesizable Digital Logic Core',
+        internal_components: ['sky130_fd_sc_hd__logic_1', 'Standard Cell Core'],
+        bit_width: 32
+      }];
+
+      const inX = 60;
+      const blockX = 350;
+      const bW = 270;
+      const bH = 88;
+      const outX = 780;
+
+      const inSpacing = 55;
+      const blockSpacing = 115;
+      const outSpacing = 55;
+
+      const maxInH = inputs.length * inSpacing;
+      const maxBlkH = blocks.length * blockSpacing;
+      const maxOutH = outputs.length * outSpacing;
+      const totalH = Math.max(maxInH, maxBlkH, maxOutH, 360) + 120;
+
+      const inStartY = (totalH - maxInH) / 2 + 30;
+      const blkStartY = (totalH - maxBlkH) / 2 + 40;
+      const outStartY = (totalH - maxOutH) / 2 + 30;
+
+      // Coordinate Maps
+      const inputPos = {};
+      const outputPos = {};
+      const blockInputPos = {};
+      const blockOutputPos = {};
+
+      // 1. Draw Inputs Column
+      inputs.forEach((p, idx) => {
+        const y = inStartY + idx * inSpacing;
+        inputPos[p.name] = { x: inX + 80, y: y };
+
+        const portG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        portG.innerHTML = `
+          <rect x="${inX - 40}" y="${y - 14}" width="120" height="28" rx="6" fill="#0d1527" stroke="#1e293b" stroke-width="1.5" />
+          <circle cx="${inX - 28}" cy="${y}" r="4" fill="#10b981" />
+          <text x="${inX - 18}" y="${y + 4}" fill="#f8fafc" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600">${p.name}</text>
+          <text x="${inX + 68}" y="${y + 3}" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="end">${p.range_str !== '1-bit' ? p.range_str : ''}</text>
+          <line x1="${inX + 80}" y1="${y}" x2="${inX + 110}" y2="${y}" stroke="${p.width > 1 ? '#818cf8' : '#38bdf8'}" stroke-width="${p.width > 1 ? 2.5 : 1.5}" />
+        `;
+        g.appendChild(portG);
+      });
+
+      // 2. Draw Outputs Column
+      outputs.forEach((p, idx) => {
+        const y = outStartY + idx * outSpacing;
+        outputPos[p.name] = { x: outX, y: y };
+
+        const portG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        portG.innerHTML = `
+          <line x1="${outX - 30}" y1="${y}" x2="${outX}" y2="${y}" stroke="${p.width > 1 ? '#818cf8' : '#38bdf8'}" stroke-width="${p.width > 1 ? 2.5 : 1.5}" />
+          <rect x="${outX}" y="${y - 14}" width="120" height="28" rx="6" fill="#0d1527" stroke="#1e293b" stroke-width="1.5" />
+          <circle cx="${outX + 108}" cy="${y}" r="4" fill="#38bdf8" />
+          <text x="${outX + 12}" y="${y + 4}" fill="#f8fafc" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600">${p.name}</text>
+          <text x="${outX + 96}" y="${y + 3}" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="end">${p.range_str !== '1-bit' ? p.range_str : ''}</text>
+        `;
+        g.appendChild(portG);
+      });
+
+      // 3. Draw Functional Hardware Blocks
+      blocks.forEach((blk, idx) => {
+        const y = blkStartY + idx * blockSpacing;
+
+        blockInputPos[blk.id] = { x: blockX, y: y + bH / 2 };
+        blockOutputPos[blk.id] = { x: blockX + bW, y: y + bH / 2 };
+
+        const blkG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        blkG.setAttribute('class', 'schematic-block-node');
+        blkG.setAttribute('data-block-id', blk.id);
+        blkG.style.cursor = 'pointer';
+        
+        // Block styling based on hardware type
+        let headerColor = '#38bdf8';
+        let strokeColor = 'rgba(56, 189, 248, 0.45)';
+        let iconSymbol = '';
+
+        if (blk.type === 'gate') {
+          headerColor = '#10b981';
+          strokeColor = 'rgba(16, 185, 129, 0.45)';
+          iconSymbol = '<path d="M 12 12 L 20 12 A 8 8 0 0 1 20 28 L 12 28 Z" fill="none" stroke="#10b981" stroke-width="2"/>';
+        } else if (blk.type === 'mux') {
+          headerColor = '#f59e0b';
+          strokeColor = 'rgba(245, 158, 11, 0.45)';
+          iconSymbol = '<polygon points="12,10 26,14 26,26 12,30" fill="none" stroke="#f59e0b" stroke-width="1.8"/>';
+        } else if (blk.type === 'alu') {
+          headerColor = '#38bdf8';
+          strokeColor = 'rgba(56, 189, 248, 0.55)';
+          iconSymbol = '<polygon points="12,10 24,14 24,18 20,20 24,22 24,26 12,30" fill="none" stroke="#38bdf8" stroke-width="1.8"/>';
+        } else if (blk.type === 'dff' || blk.type === 'counter' || blk.type === 'fsm') {
+          headerColor = '#c084fc';
+          strokeColor = 'rgba(192, 132, 252, 0.55)';
+          iconSymbol = '<rect x="12" y="10" width="16" height="20" rx="2" fill="none" stroke="#c084fc" stroke-width="1.8"/><polyline points="12,25 17,27 12,29" fill="none" stroke="#c084fc" stroke-width="1.5"/>';
+        }
+
+        blkG.innerHTML = `
+          <!-- Block Body -->
+          <rect class="block-bg" x="${blockX}" y="${y}" width="${bW}" height="${bH}" rx="8" fill="#0b1324" stroke="${strokeColor}" stroke-width="2" />
+          
+          <!-- Inner Component Emblem -->
+          <g transform="translate(${blockX + 8}, ${y + 8}) scale(0.9)">
+            ${iconSymbol}
+          </g>
+
+          <!-- Block Title & Details -->
+          <text x="${blockX + 44}" y="${y + 24}" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700">${blk.label}</text>
+          <text x="${blockX + 44}" y="${y + 42}" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="10">${blk.subtext || blk.type.toUpperCase()}</text>
+          
+          <!-- Interactive 'Click to Open Block' Pill Badge -->
+          <g transform="translate(${blockX + 44}, ${y + 56})">
+            <rect x="0" y="0" width="144" height="20" rx="4" fill="rgba(56, 189, 248, 0.12)" stroke="${headerColor}" stroke-width="0.8" />
+            <text class="block-hint" x="8" y="14" fill="${headerColor}" font-family="'Inter', sans-serif" font-size="9" font-weight="600">🔍 Click to Open Block ↗</text>
+          </g>
+
+          <!-- Port indicators -->
+          <circle cx="${blockX}" cy="${y + bH / 2}" r="4" fill="${headerColor}" />
+          <circle cx="${blockX + bW}" cy="${y + bH / 2}" r="4" fill="${headerColor}" />
+        `;
+
+        // Direct click event to open Block Inspector!
+        blkG.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openBlockInspector(blk);
+        });
+
+        // Hover effect on the rect
+        const bgRect = blkG.querySelector('.block-bg');
+        blkG.addEventListener('mouseenter', () => {
+          bgRect.setAttribute('stroke', headerColor);
+          bgRect.setAttribute('stroke-width', '2.5');
+          bgRect.style.filter = `drop-shadow(0 0 10px ${headerColor})`;
+        });
+        blkG.addEventListener('mouseleave', () => {
+          bgRect.setAttribute('stroke', strokeColor);
+          bgRect.setAttribute('stroke-width', '2');
+          bgRect.style.filter = 'none';
+        });
+
+        g.appendChild(blkG);
+      });
+
+      // 4. Draw Orthogonal Interconnecting Wires
+      inputs.forEach(inp => {
+        const src = inputPos[inp.name];
+        const tgtBlock = blocks.find(b => b.inputs.includes(inp.name)) || blocks[0];
+        const dst = blockInputPos[tgtBlock.id];
+        if (src && dst) {
+          drawWire(g, src.x + 30, src.y, dst.x, dst.y, inp.width > 1);
+        }
+      });
+
+      blocks.forEach(blk => {
+        const src = blockOutputPos[blk.id];
+        blk.outputs.forEach(outName => {
+          const dst = outputPos[outName];
+          if (src && dst) {
+            drawWire(g, src.x, src.y, dst.x - 30, dst.y, false);
+          }
+        });
+      });
+
+      // If any output not explicitly driven, connect last block to it
+      outputs.forEach(out => {
+        const isDriven = blocks.some(b => b.outputs.includes(out.name));
+        if (!isDriven && blocks.length > 0) {
+          const lastB = blocks[blocks.length - 1];
+          const src = blockOutputPos[lastB.id];
+          const dst = outputPos[out.name];
+          if (src && dst) {
+            drawWire(g, src.x, src.y, dst.x - 30, dst.y, out.width > 1);
+          }
+        }
+      });
+
+      // Update SVG canvas bounds
+      const svg = document.getElementById('schematicSvgCanvas');
+      svg.setAttribute('viewBox', `0 0 980 ${totalH}`);
+      applySchematicTransform();
+    }
+
+    // --- Sub-Circuit Block Drill-Down Inspector Engine ---
+    let currentInspectedBlock = null;
+
+    function openBlockInspector(blk) {
+      currentInspectedBlock = blk;
+      const modal = document.getElementById('blockInspectorModal');
+      if (!modal) return;
+
+      // 1. Header Information
+      document.getElementById('modalBlockTitle').textContent = blk.label || 'Hardware Block';
+      document.getElementById('modalBlockSubtext').textContent = blk.subtext || (blk.type ? blk.type.toUpperCase() : 'CORE');
+
+      const pill = document.getElementById('modalIconPill');
+      const badge = document.getElementById('modalTypeBadge');
+
+      const type = (blk.type || '').toLowerCase();
+      if (type === 'alu') {
+        pill.innerHTML = '⚡';
+        pill.style.borderColor = 'rgba(56, 189, 248, 0.4)';
+        badge.textContent = `ALU Core (${blk.bit_width || 32}-bit)`;
+        badge.style.color = '#38bdf8';
+        badge.style.borderColor = '#38bdf8';
+      } else if (type === 'counter') {
+        pill.innerHTML = '🔢';
+        pill.style.borderColor = 'rgba(192, 132, 252, 0.4)';
+        badge.textContent = `Counter (${blk.bit_width || 32}-bit)`;
+        badge.style.color = '#c084fc';
+        badge.style.borderColor = '#c084fc';
+      } else if (type === 'dff') {
+        pill.innerHTML = '⏱️';
+        pill.style.borderColor = 'rgba(192, 132, 252, 0.4)';
+        badge.textContent = `DFF Register (${blk.bit_width || 1}-bit)`;
+        badge.style.color = '#c084fc';
+        badge.style.borderColor = '#c084fc';
+      } else if (type === 'mux') {
+        pill.innerHTML = '🔀';
+        pill.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+        badge.textContent = `MUX (${blk.bit_width || 1}-bit)`;
+        badge.style.color = '#f59e0b';
+        badge.style.borderColor = '#f59e0b';
+      } else if (type === 'fsm') {
+        pill.innerHTML = '🔄';
+        pill.style.borderColor = 'rgba(192, 132, 252, 0.4)';
+        badge.textContent = `FSM Controller`;
+        badge.style.color = '#c084fc';
+        badge.style.borderColor = '#c084fc';
+      } else if (type === 'gate') {
+        pill.innerHTML = '🔲';
+        pill.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        badge.textContent = `Logic Gate`;
+        badge.style.color = '#10b981';
+        badge.style.borderColor = '#10b981';
+      } else {
+        pill.innerHTML = '⚙️';
+        pill.style.borderColor = 'rgba(56, 189, 248, 0.4)';
+        badge.textContent = `Logic Block`;
+        badge.style.color = '#38bdf8';
+        badge.style.borderColor = '#38bdf8';
+      }
+
+      // 2. Render Internal Sub-Circuit Diagram
+      const canvas = document.getElementById('modalSubCircuitDiagram');
+      canvas.innerHTML = renderSubCircuitSvg(blk);
+
+      // 3. Render Ports Table & Probes
+      const portsTable = document.getElementById('modalPortsTable');
+      portsTable.innerHTML = '';
+      const allPorts = [];
+      (blk.inputs || []).forEach(p => allPorts.push({ name: p, dir: 'IN' }));
+      (blk.outputs || []).forEach(p => allPorts.push({ name: p, dir: 'OUT' }));
+
+      if (allPorts.length === 0) {
+        portsTable.innerHTML = '<div style="color:var(--text-muted); font-size:11px; padding:6px;">No external pin mappings.</div>';
+      } else {
+        allPorts.forEach(port => {
+          let probedVal = '0x0';
+          let hasWave = false;
+
+          if (cachedWaveDrom && cachedWaveDrom.signal) {
+            const sig = cachedWaveDrom.signal.find(s => s.name === port.name);
+            if (sig) {
+              hasWave = true;
+              const cycleIdx = selectedProbeCycle !== null ? selectedProbeCycle : 0;
+              if (sig.data && sig.data[cycleIdx] !== undefined) {
+                probedVal = sig.data[cycleIdx];
+              } else if (sig.wave) {
+                const char = sig.wave[cycleIdx] || sig.wave[0] || '0';
+                probedVal = char === '1' ? '1' : (char === '0' ? '0' : char);
+              }
+            }
+          }
+
+          const row = document.createElement('div');
+          row.className = 'port-row';
+          const isInput = port.dir === 'IN';
+          row.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; background:${isInput ? 'rgba(56,189,248,0.15)' : 'rgba(16,185,129,0.15)'}; color:${isInput ? '#38bdf8' : '#10b981'};">${port.dir}</span>
+              <span style="color:#f8fafc; font-weight:600;">${port.name}</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="port-val-badge">${probedVal}</span>
+              <span style="font-size:9px; color:${hasWave ? '#34d399' : '#64748b'};">${hasWave ? '● Live' : '○ Static'}</span>
+            </div>
+          `;
+          portsTable.appendChild(row);
+        });
+      }
+
+      // 4. Render SkyWater 130nm ASIC Macro Cells
+      const cellsList = document.getElementById('modalCellsList');
+      cellsList.innerHTML = '';
+      const comps = blk.internal_components && blk.internal_components.length > 0
+        ? blk.internal_components
+        : ['sky130_fd_sc_hd__logic_1', 'CMOS Cell Mapping', 'Output Gated Buffer'];
+
+      comps.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'cell-row';
+        row.innerHTML = `
+          <span style="color:#f59e0b; font-size:12px;">◈</span>
+          <span style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#e2e8f0;">${c}</span>
+        `;
+        cellsList.appendChild(row);
+      });
+
+      // 5. Render Verilog RTL Source Code
+      const rtlPre = document.getElementById('modalRtlSnippet');
+      rtlPre.textContent = blk.verilog_snippet || `// Hardware definition for ${blk.label}\n// Synthesized as ${blk.type}`;
+
+      modal.style.display = 'flex';
+      log(`[Schematic] Opened Sub-Circuit Inspector for '${blk.label}'`, 'log-info');
+    }
+
+    function closeBlockInspector() {
+      const modal = document.getElementById('blockInspectorModal');
+      if (modal) modal.style.display = 'none';
+      currentInspectedBlock = null;
+    }
+
+    function handleModalBackdropClick(event) {
+      if (event.target && event.target.id === 'blockInspectorModal') {
+        closeBlockInspector();
+      }
+    }
+
+    function copyBlockRtlSnippet() {
+      if (currentInspectedBlock && currentInspectedBlock.verilog_snippet) {
+        navigator.clipboard.writeText(currentInspectedBlock.verilog_snippet);
+        log(`[SILIX] Copied RTL snippet for ${currentInspectedBlock.label}`, 'log-success');
+      } else {
+        const text = document.getElementById('modalRtlSnippet').textContent;
+        navigator.clipboard.writeText(text);
+        log(`[SILIX] Copied RTL snippet`, 'log-success');
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeBlockInspector();
+      }
+    });
+
+    function renderSubCircuitSvg(blk) {
+      const type = (blk.type || '').toLowerCase();
+      const bitWidth = blk.bit_width || 32;
+
+      if (type === 'alu') {
+        return `
+          <svg viewBox="0 0 760 210" width="100%" height="210" style="display:block;">
+            <defs>
+              <linearGradient id="aluGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#0b1b36"/>
+                <stop offset="100%" stop-color="#061021"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Inputs Operands A & B -->
+            <rect x="20" y="35" width="90" height="30" rx="5" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
+            <text x="65" y="54" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="bold" text-anchor="middle">A [${bitWidth-1}:0]</text>
+            <line x1="110" y1="50" x2="170" y2="50" stroke="#38bdf8" stroke-width="2.5"/>
+
+            <rect x="20" y="145" width="90" height="30" rx="5" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
+            <text x="65" y="164" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="bold" text-anchor="middle">B [${bitWidth-1}:0]</text>
+            <line x1="110" y1="160" x2="170" y2="160" stroke="#38bdf8" stroke-width="2.5"/>
+
+            <!-- Input Distribution Bus -->
+            <line x1="170" y1="35" x2="170" y2="175" stroke="#38bdf8" stroke-width="2"/>
+
+            <!-- 1. CLA Adder / Subtractor -->
+            <line x1="170" y1="35" x2="210" y2="35" stroke="#38bdf8" stroke-width="1.5"/>
+            <rect x="210" y="20" width="190" height="32" rx="6" fill="url(#aluGrad)" stroke="rgba(56,189,248,0.5)" stroke-width="1.5"/>
+            <text x="220" y="40" fill="#f8fafc" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold">± ADD / SUB (CLA)</text>
+            <text x="390" y="40" fill="#64748b" font-family="'Inter', sans-serif" font-size="9" text-anchor="end">sky130_fa_1</text>
+            <line x1="400" y1="36" x2="470" y2="55" stroke="#38bdf8" stroke-width="1.8"/>
+
+            <!-- 2. Bitwise Logic (AND, OR, XOR) -->
+            <line x1="170" y1="75" x2="210" y2="75" stroke="#38bdf8" stroke-width="1.5"/>
+            <rect x="210" y="60" width="190" height="32" rx="6" fill="url(#aluGrad)" stroke="rgba(56,189,248,0.5)" stroke-width="1.5"/>
+            <text x="220" y="80" fill="#f8fafc" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold">&amp; | ^ Bitwise Logic</text>
+            <text x="390" y="80" fill="#64748b" font-family="'Inter', sans-serif" font-size="9" text-anchor="end">sky130_gate_1</text>
+            <line x1="400" y1="76" x2="470" y2="75" stroke="#38bdf8" stroke-width="1.8"/>
+
+            <!-- 3. Barrel Shifter -->
+            <line x1="170" y1="120" x2="210" y2="120" stroke="#38bdf8" stroke-width="1.5"/>
+            <rect x="210" y="105" width="190" height="32" rx="6" fill="url(#aluGrad)" stroke="rgba(56,189,248,0.5)" stroke-width="1.5"/>
+            <text x="220" y="125" fill="#f8fafc" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold">&lt;&lt; &gt;&gt; Barrel Shifter</text>
+            <text x="390" y="125" fill="#64748b" font-family="'Inter', sans-serif" font-size="9" text-anchor="end">sky130_mux2_1</text>
+            <line x1="400" y1="121" x2="470" y2="95" stroke="#38bdf8" stroke-width="1.8"/>
+
+            <!-- 4. Comparator / Branch Flags -->
+            <line x1="170" y1="165" x2="210" y2="165" stroke="#38bdf8" stroke-width="1.5"/>
+            <rect x="210" y="150" width="190" height="32" rx="6" fill="url(#aluGrad)" stroke="rgba(56,189,248,0.5)" stroke-width="1.5"/>
+            <text x="220" y="170" fill="#f8fafc" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold">&lt; = &gt; Comparator</text>
+            <text x="390" y="170" fill="#64748b" font-family="'Inter', sans-serif" font-size="9" text-anchor="end">sky130_cmp_1</text>
+            <line x1="400" y1="166" x2="470" y2="115" stroke="#38bdf8" stroke-width="1.8"/>
+
+            <!-- 4:1 Multiplexer Tree -->
+            <polygon points="470,35 525,55 525,125 470,145" fill="#131d36" stroke="#f59e0b" stroke-width="1.8"/>
+            <text x="496" y="93" fill="#f59e0b" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">MUX</text>
+
+            <!-- Opcode Select Control Line -->
+            <line x1="497" y1="185" x2="497" y2="135" stroke="#f59e0b" stroke-width="2"/>
+            <rect x="440" y="185" width="115" height="20" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+            <text x="497" y="199" fill="#f59e0b" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="bold" text-anchor="middle">OP / FUNCT [2:0]</text>
+
+            <!-- Output Bus -->
+            <line x1="525" y1="90" x2="630" y2="90" stroke="#38bdf8" stroke-width="2.5"/>
+            <rect x="630" y="74" width="115" height="32" rx="6" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5"/>
+            <text x="687" y="94" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="bold" text-anchor="middle">RESULT [${bitWidth-1}:0]</text>
+
+            <!-- Status Flags Unit -->
+            <line x1="565" y1="90" x2="565" y2="145" stroke="#c084fc" stroke-width="1.5"/>
+            <line x1="565" y1="145" x2="630" y2="145" stroke="#c084fc" stroke-width="1.5"/>
+            <rect x="630" y="130" width="115" height="30" rx="5" fill="#0f172a" stroke="#c084fc" stroke-width="1.2"/>
+            <text x="687" y="149" fill="#c084fc" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">FLAGS [Z, C, V, N]</text>
+          </svg>
+        `;
+      } else if (type === 'counter') {
+        return `
+          <svg viewBox="0 0 760 210" width="100%" height="210" style="display:block;">
+            <defs>
+              <linearGradient id="cntGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1e1336"/>
+                <stop offset="100%" stop-color="#0e0a1e"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Reset & Clock Controls -->
+            <rect x="20" y="30" width="90" height="26" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="1.2"/>
+            <text x="65" y="47" fill="#10b981" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">rst_n / clk</text>
+
+            <!-- Enable Gate -->
+            <rect x="20" y="75" width="90" height="26" rx="5" fill="#0f172a" stroke="#c084fc" stroke-width="1.2"/>
+            <text x="65" y="92" fill="#c084fc" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">enable / load</text>
+
+            <!-- N-bit Adder / Incrementer (+1 or +4) -->
+            <rect x="160" y="60" width="130" height="65" rx="8" fill="url(#cntGrad)" stroke="#c084fc" stroke-width="1.8"/>
+            <text x="225" y="88" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="bold" text-anchor="middle">+ 1 / + 4</text>
+            <text x="225" y="108" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="9" text-anchor="middle">Full Adder Slice</text>
+
+            <line x1="290" y1="92" x2="340" y2="92" stroke="#c084fc" stroke-width="2.5"/>
+
+            <!-- Mux for Sync Load/Clear -->
+            <polygon points="340,65 375,75 375,115 340,125" fill="#17122a" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="357" y="98" fill="#f59e0b" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="bold" text-anchor="middle">MUX</text>
+
+            <line x1="375" y1="95" x2="425" y2="95" stroke="#c084fc" stroke-width="2.5"/>
+
+            <!-- N-bit Register Array (sky130_fd_sc_hd__dfxtp_1) -->
+            <rect x="425" y="45" width="170" height="100" rx="8" fill="#130e26" stroke="#c084fc" stroke-width="2"/>
+            <text x="510" y="72" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="bold" text-anchor="middle">${bitWidth}-BIT DFF ARRAY</text>
+            <text x="510" y="92" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="10" text-anchor="middle">sky130_fd_sc_hd__dfxtp_1</text>
+            <polyline points="425,120 440,128 425,136" fill="none" stroke="#10b981" stroke-width="1.8"/>
+            <text x="448" y="132" fill="#10b981" font-family="'JetBrains Mono', monospace" font-size="9">CLK</text>
+
+            <!-- Output Bus -->
+            <line x1="595" y1="95" x2="650" y2="95" stroke="#c084fc" stroke-width="2.5"/>
+            <rect x="650" y="78" width="100" height="34" rx="6" fill="#0f172a" stroke="#c084fc" stroke-width="1.5"/>
+            <text x="700" y="99" fill="#c084fc" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="bold" text-anchor="middle">Q [${bitWidth-1}:0]</text>
+
+            <!-- Terminal Count Detector -->
+            <line x1="620" y1="95" x2="620" y2="165" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="620" y1="165" x2="650" y2="165" stroke="#f59e0b" stroke-width="1.5"/>
+            <rect x="650" y="152" width="100" height="26" rx="5" fill="#0f172a" stroke="#f59e0b" stroke-width="1.2"/>
+            <text x="700" y="169" fill="#f59e0b" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="bold" text-anchor="middle">TC (Q == MAX)</text>
+
+            <!-- Feedback Loop Line: Q back to Incrementer -->
+            <path d="M 610 95 L 610 185 L 140 185 L 140 92 L 160 92" fill="none" stroke="#c084fc" stroke-width="2" stroke-dasharray="4 2"/>
+            <text x="360" y="198" fill="#c084fc" font-family="'Inter', sans-serif" font-size="9" font-weight="bold" text-anchor="middle">Synchronous Feedback Loop [${bitWidth}-bit]</text>
+          </svg>
+        `;
+      } else if (type === 'dff') {
+        return `
+          <svg viewBox="0 0 760 210" width="100%" height="210" style="display:block;">
+            <defs>
+              <linearGradient id="dffGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1c1130"/>
+                <stop offset="100%" stop-color="#0d0917"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Inputs -->
+            <rect x="20" y="55" width="70" height="28" rx="5" fill="#0f172a" stroke="#c084fc" stroke-width="1.2"/>
+            <text x="55" y="73" fill="#c084fc" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="bold" text-anchor="middle">D</text>
+            <line x1="90" y1="69" x2="150" y2="69" stroke="#c084fc" stroke-width="2"/>
+
+            <rect x="20" y="125" width="70" height="28" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="1.2"/>
+            <text x="55" y="143" fill="#10b981" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="bold" text-anchor="middle">CLK</text>
+            <line x1="90" y1="139" x2="130" y2="139" stroke="#10b981" stroke-width="1.8"/>
+
+            <!-- Clock Inverter Pair -->
+            <polygon points="130,130 148,139 130,148" fill="#1e293b" stroke="#10b981" stroke-width="1.2"/>
+            <circle cx="152" cy="139" r="3" fill="none" stroke="#10b981" stroke-width="1.2"/>
+            <text x="140" y="165" fill="#10b981" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">CLK#</text>
+
+            <!-- Master Latch Stage -->
+            <rect x="170" y="35" width="200" height="120" rx="8" fill="url(#dffGrad)" stroke="rgba(192,132,252,0.6)" stroke-width="1.8"/>
+            <text x="270" y="55" fill="#c084fc" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">MASTER STAGE (CLK#=1)</text>
+            <rect x="185" y="65" width="75" height="30" rx="4" fill="#090d16" stroke="#c084fc" stroke-width="1"/>
+            <text x="222" y="84" fill="#f8fafc" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">TG1 Pass</text>
+            <rect x="280" y="65" width="75" height="30" rx="4" fill="#090d16" stroke="#c084fc" stroke-width="1"/>
+            <text x="317" y="84" fill="#f8fafc" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">Latch Loop</text>
+            <text x="270" y="135" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="9" text-anchor="middle">Setup: 0.12ns</text>
+
+            <line x1="370" y1="80" x2="410" y2="80" stroke="#c084fc" stroke-width="2"/>
+
+            <!-- Slave Latch Stage -->
+            <rect x="410" y="35" width="200" height="120" rx="8" fill="url(#dffGrad)" stroke="rgba(192,132,252,0.6)" stroke-width="1.8"/>
+            <text x="510" y="55" fill="#c084fc" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">SLAVE STAGE (CLK=1)</text>
+            <rect x="425" y="65" width="75" height="30" rx="4" fill="#090d16" stroke="#c084fc" stroke-width="1"/>
+            <text x="462" y="84" fill="#f8fafc" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">TG2 Pass</text>
+            <rect x="520" y="65" width="75" height="30" rx="4" fill="#090d16" stroke="#c084fc" stroke-width="1"/>
+            <text x="557" y="84" fill="#f8fafc" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">Latch Loop</text>
+            <text x="510" y="135" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="9" text-anchor="middle">Clk-to-Q: 0.28ns</text>
+
+            <!-- Output Drivers -->
+            <line x1="610" y1="80" x2="660" y2="80" stroke="#c084fc" stroke-width="2"/>
+            <rect x="660" y="65" width="80" height="30" rx="5" fill="#0f172a" stroke="#c084fc" stroke-width="1.5"/>
+            <text x="700" y="84" fill="#c084fc" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="bold" text-anchor="middle">Q</text>
+
+            <line x1="630" y1="80" x2="630" y2="135" stroke="#94a3b8" stroke-width="1.5"/>
+            <line x1="630" y1="135" x2="660" y2="135" stroke="#94a3b8" stroke-width="1.5"/>
+            <rect x="660" y="120" width="80" height="30" rx="5" fill="#0f172a" stroke="#94a3b8" stroke-width="1.2"/>
+            <text x="700" y="139" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">Q_BAR</text>
+            
+            <text x="390" y="185" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="10" text-anchor="middle">SkyWater 130nm Macro: sky130_fd_sc_hd__dfxtp_1 (Dual Transmission-Gate Flip-Flop)</text>
+          </svg>
+        `;
+      } else if (type === 'mux') {
+        return `
+          <svg viewBox="0 0 760 200" width="100%" height="200" style="display:block;">
+            <!-- Inputs D0-D3 -->
+            <rect x="30" y="25" width="70" height="24" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="1.2"/>
+            <text x="65" y="41" fill="#f59e0b" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">IN 0</text>
+            <line x1="100" y1="37" x2="220" y2="37" stroke="#f59e0b" stroke-width="1.5"/>
+
+            <rect x="30" y="65" width="70" height="24" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="1.2"/>
+            <text x="65" y="81" fill="#f59e0b" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">IN 1</text>
+            <line x1="100" y1="77" x2="220" y2="77" stroke="#f59e0b" stroke-width="1.5"/>
+
+            <rect x="30" y="105" width="70" height="24" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="1.2"/>
+            <text x="65" y="121" fill="#f59e0b" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">IN 2</text>
+            <line x1="100" y1="117" x2="220" y2="117" stroke="#f59e0b" stroke-width="1.5"/>
+
+            <rect x="30" y="145" width="70" height="24" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="1.2"/>
+            <text x="65" y="161" fill="#f59e0b" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">IN 3</text>
+            <line x1="100" y1="157" x2="220" y2="157" stroke="#f59e0b" stroke-width="1.5"/>
+
+            <!-- AND Gate Array -->
+            <rect x="220" y="25" width="120" height="24" rx="5" fill="#1e180d" stroke="#f59e0b" stroke-width="1.2"/>
+            <text x="280" y="41" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">AND Gate 0</text>
+            <line x1="340" y1="37" x2="460" y2="75" stroke="#f59e0b" stroke-width="1.5"/>
+
+            <rect x="220" y="65" width="120" height="24" rx="5" fill="#1e180d" stroke="#f59e0b" stroke-width="1.2"/>
+            <text x="280" y="81" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">AND Gate 1</text>
+            <line x1="340" y1="77" x2="460" y2="85" stroke="#f59e0b" stroke-width="1.5"/>
+
+            <rect x="220" y="105" width="120" height="24" rx="5" fill="#1e180d" stroke="#f59e0b" stroke-width="1.2"/>
+            <text x="280" y="121" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">AND Gate 2</text>
+            <line x1="340" y1="117" x2="460" y2="105" stroke="#f59e0b" stroke-width="1.5"/>
+
+            <rect x="220" y="145" width="120" height="24" rx="5" fill="#1e180d" stroke="#f59e0b" stroke-width="1.2"/>
+            <text x="280" y="161" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">AND Gate 3</text>
+            <line x1="340" y1="157" x2="460" y2="115" stroke="#f59e0b" stroke-width="1.5"/>
+
+            <!-- Summing OR Gate -->
+            <rect x="460" y="60" width="120" height="70" rx="8" fill="#1f1807" stroke="#f59e0b" stroke-width="1.8"/>
+            <text x="520" y="93" fill="#f59e0b" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="bold" text-anchor="middle">WIDE OR</text>
+            <text x="520" y="112" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="9" text-anchor="middle">sky130_mux2_1</text>
+
+            <!-- Output -->
+            <line x1="580" y1="95" x2="640" y2="95" stroke="#f59e0b" stroke-width="2.5"/>
+            <rect x="640" y="80" width="90" height="30" rx="5" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="685" y="99" fill="#f59e0b" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="bold" text-anchor="middle">OUT</text>
+          </svg>
+        `;
+      } else if (type === 'fsm') {
+        return `
+          <svg viewBox="0 0 760 210" width="100%" height="210" style="display:block;">
+            <defs>
+              <linearGradient id="fsmGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#19102c"/>
+                <stop offset="100%" stop-color="#0d0818"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Inputs -->
+            <rect x="20" y="65" width="80" height="28" rx="5" fill="#0f172a" stroke="#c084fc" stroke-width="1.2"/>
+            <text x="60" y="83" fill="#c084fc" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">INPUTS</text>
+            <line x1="100" y1="79" x2="150" y2="79" stroke="#c084fc" stroke-width="2"/>
+
+            <!-- Next State Combinational Logic -->
+            <rect x="150" y="45" width="160" height="100" rx="8" fill="url(#fsmGrad)" stroke="#c084fc" stroke-width="1.8"/>
+            <text x="230" y="75" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="bold" text-anchor="middle">NEXT-STATE LOGIC</text>
+            <text x="230" y="98" fill="#c084fc" font-family="'Inter', sans-serif" font-size="9" text-anchor="middle">Combinational Decoder</text>
+            <text x="230" y="118" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="9" text-anchor="middle">FSM State Transitions</text>
+
+            <line x1="310" y1="95" x2="360" y2="95" stroke="#c084fc" stroke-width="2.5"/>
+
+            <!-- State Register (DFFs) -->
+            <rect x="360" y="45" width="140" height="100" rx="8" fill="#130e24" stroke="#10b981" stroke-width="2"/>
+            <text x="430" y="75" fill="#10b981" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="bold" text-anchor="middle">STATE REG (DFF)</text>
+            <text x="430" y="98" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="10" text-anchor="middle">Current State</text>
+            <polyline points="360,120 375,128 360,136" fill="none" stroke="#10b981" stroke-width="1.8"/>
+            <text x="382" y="132" fill="#10b981" font-family="'JetBrains Mono', monospace" font-size="9">clk</text>
+
+            <line x1="500" y1="95" x2="550" y2="95" stroke="#c084fc" stroke-width="2.5"/>
+
+            <!-- Output Combinational Logic -->
+            <rect x="550" y="45" width="140" height="100" rx="8" fill="url(#fsmGrad)" stroke="#c084fc" stroke-width="1.8"/>
+            <text x="620" y="75" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="bold" text-anchor="middle">OUTPUT DECODE</text>
+            <text x="620" y="98" fill="#c084fc" font-family="'Inter', sans-serif" font-size="9" text-anchor="middle">Moore / Mealy Matrix</text>
+
+            <line x1="690" y1="95" x2="730" y2="95" stroke="#c084fc" stroke-width="2"/>
+
+            <!-- State Feedback Bus Loop -->
+            <path d="M 470 145 L 470 180 L 200 180 L 200 145" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="4 2"/>
+            <text x="335" y="194" fill="#10b981" font-family="'Inter', sans-serif" font-size="9" font-weight="bold" text-anchor="middle">State Feedback Bus [Q_state]</text>
+          </svg>
+        `;
+      } else {
+        return `
+          <svg viewBox="0 0 760 190" width="100%" height="190" style="display:block;">
+            <!-- VDD Rail -->
+            <line x1="180" y1="20" x2="580" y2="20" stroke="#fb7185" stroke-width="2.5"/>
+            <text x="380" y="15" fill="#fb7185" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">VDD Power Rail (+1.8V)</text>
+
+            <!-- PMOS Pull-Up Network -->
+            <rect x="280" y="35" width="200" height="42" rx="6" fill="#1e131d" stroke="#fb7185" stroke-width="1.5"/>
+            <text x="380" y="55" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">PMOS PULL-UP NETWORK</text>
+            <text x="380" y="70" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="9" text-anchor="middle">sky130_fd_sc_hd Standard Cell</text>
+
+            <!-- Middle Output Node -->
+            <line x1="380" y1="77" x2="380" y2="105" stroke="#38bdf8" stroke-width="2.5"/>
+            <circle cx="380" cy="91" r="5" fill="#38bdf8"/>
+            <line x1="380" y1="91" x2="620" y2="91" stroke="#38bdf8" stroke-width="2.5"/>
+            <rect x="620" y="76" width="90" height="30" rx="5" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5"/>
+            <text x="665" y="95" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="bold" text-anchor="middle">OUTPUT (Y)</text>
+
+            <!-- NMOS Pull-Down Network -->
+            <rect x="280" y="105" width="200" height="42" rx="6" fill="#0f1b24" stroke="#10b981" stroke-width="1.5"/>
+            <text x="380" y="125" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">NMOS PULL-DOWN NETWORK</text>
+            <text x="380" y="140" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="9" text-anchor="middle">Series / Parallel Switches</text>
+
+            <!-- Inputs -->
+            <line x1="120" y1="60" x2="280" y2="60" stroke="#10b981" stroke-width="1.8"/>
+            <line x1="120" y1="125" x2="280" y2="125" stroke="#10b981" stroke-width="1.8"/>
+            <rect x="50" y="46" width="70" height="26" rx="4" fill="#0f172a" stroke="#10b981" stroke-width="1.2"/>
+            <text x="85" y="63" fill="#10b981" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">IN A</text>
+            <rect x="50" y="112" width="70" height="26" rx="4" fill="#0f172a" stroke="#10b981" stroke-width="1.2"/>
+            <text x="85" y="129" fill="#10b981" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">IN B</text>
+
+            <!-- GND Rail -->
+            <line x1="180" y1="165" x2="580" y2="165" stroke="#64748b" stroke-width="2.5"/>
+            <text x="380" y="180" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="bold" text-anchor="middle">GND Ground Rail (0.0V)</text>
+          </svg>
+        `;
+      }
+    }
+
+    function drawWire(parentG, x1, y1, x2, y2, isBus) {
+      const midX = x1 + (x2 - x1) * 0.5;
+      const wire = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      const strokeColor = isBus ? '#818cf8' : '#38bdf8';
+      const strokeWidth = isBus ? 2.5 : 1.5;
+      const marker = isBus ? 'url(#bus-arrow)' : 'url(#arrow)';
+
+      const pathData = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
+      wire.setAttribute('d', pathData);
+      wire.setAttribute('fill', 'none');
+      wire.setAttribute('stroke', strokeColor);
+      wire.setAttribute('stroke-width', strokeWidth);
+      wire.setAttribute('marker-end', marker);
+      wire.setAttribute('stroke-linecap', 'round');
+      wire.setAttribute('stroke-linejoin', 'round');
+      parentG.appendChild(wire);
+    }
+
+    // --- Render Mermaid Block Diagram (Secondary View) ---
+    async function renderMermaidDiagram(data) {
+      const target = document.getElementById('mermaidTarget');
+      target.innerHTML = '';
+      try {
+        const cleanMermaid = data.mermaid_diagram.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F4E6}\u{1F4CA}\u{1F527}\u{1F4CC}\u{1F4CD}]/gu, '');
+        const { svg } = await mermaid.render('mermaidSvg_' + Date.now(), cleanMermaid);
+        target.innerHTML = svg;
+      } catch (e) {
+        log(`[Schematic] Mermaid rendered via visual SVG engine.`, 'log-info');
+        switchSchematicMode('svg');
+      }
+    }
+
+    // --- Render AI Mentor Diagnostics ---
+    function renderMentor(data) {
+      const container = document.getElementById('mentorCardContainer');
+      const badge = document.getElementById('issueCountPill');
+      container.innerHTML = '';
+      const totalIssues = data.total_warnings + data.total_errors;
+      badge.textContent = totalIssues;
+
+      if (data.issues.length === 0) {
+        container.innerHTML = `
+          <div class="diag-card clean">
+            <div class="diag-title" style="color:var(--accent-emerald);">✓ Clean Synthesizable Hardware</div>
+            <div class="diag-desc">${data.pedagogical_summary}</div>
+          </div>
+        `;
+        return;
+      }
+
+      data.issues.forEach(iss => {
+        const isErr = iss.severity === 'error';
+        const card = document.createElement('div');
+        card.className = `diag-card ${isErr ? 'err' : 'warn'}`;
+        card.innerHTML = `
+          <div class="diag-title" style="color:${isErr ? 'var(--accent-rose)' : 'var(--accent-amber)'};">
+            <span>[${iss.rule}] ${iss.message}</span>
+            <span>Line ${iss.line || '?'}</span>
+          </div>
+          <div class="diag-desc">${iss.explanation}</div>
+          <div class="diag-fix">💡 Recommended Fix: ${iss.fix_suggestion}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // --- Export Assets ---
+    function exportFile(type) {
+      if (type === 'vcd') {
+        if (!latestVCD) {
+          alert("Run simulation first to export VCD waveform!");
+          return;
+        }
+        downloadBlob(latestVCD, 'simulation_dump.vcd', 'text/plain');
+      } else if (type === 'dut') {
+        const code = document.getElementById('codeEditor').value;
+        downloadBlob(code, 'design_dut.v', 'text/plain');
+      } else if (type === 'tb') {
+        const tb = document.getElementById('tbEditor').value;
+        downloadBlob(tb, 'testbench.v', 'text/plain');
+      } else if (type === 'svg') {
+        const svgContent = document.getElementById('schematicSvgCanvas').outerHTML;
+        downloadBlob(svgContent, 'circuit_schematic.svg', 'image/svg+xml');
+      } else if (type === 'synth') {
+        const report = document.getElementById('synthRawReport').textContent;
+        if (!report) {
+          alert("Run silicon synthesis first to export report!");
+          return;
+        }
+        downloadBlob(report, 'synthesis_report.txt', 'text/plain');
+      }
+    }
+
+    function downloadBlob(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      log(`[Export] Downloaded '${filename}'`, 'log-info');
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

@@ -6,7 +6,7 @@ router = APIRouter(tags=["Health & Status"])
 async def health_check():
     return {
         "status": "online",
-        "service": "Silix Cloud Semiconductor Studio",
+        "service": "SILIX Studio",
         "version": "2.0.0-production",
         "engine": "SkyWater 130nm & Event-Driven Cycle Core",
         "docs_url": "/docs"
@@ -15,8 +15,8 @@ async def health_check():
 @router.get("/v1/info", summary="Supported EDA Capabilities")
 async def api_info():
     return {
-        "name": "Silix Cloud Semiconductor Studio",
-        "description": "Next-Gen Cloud RTL & ASIC Verification Platform for students, freshers, and semiconductor teams worldwide.",
+        "name": "SILIX Studio",
+        "description": "Next-Gen Silicon RTL Platform for students, educators, and hardware engineers worldwide.",
         "supported_languages": ["Verilog-2001", "Verilog-2005", "SystemVerilog (subset)"],
         "waveform_formats": ["IEEE-1364 VCD", "WaveDrom JSON"],
         "endpoints": [

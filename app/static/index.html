@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SILIX — Next-Gen Cloud Semiconductor &amp; Silicon RTL Studio</title>
+  <title>SILIX — Silicon RTL Studio</title>
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -755,10 +755,9 @@
         </div>
         <span class="brand-text">SILIX</span>
       </div>
-      <span class="badge-pro">SEMICONDUCTOR v2.0</span>
       <div class="engine-pill">
         <span class="dot-live"></span>
-        <span id="engineStatus">Cloud Engine: Online (Silix Cloud Semiconductor Studio)</span>
+        <span id="engineStatus">Online</span>
       </div>
     </div>
 
@@ -980,11 +979,11 @@
   <!-- Bottom Interactive Console Dock -->
   <div class="console-dock">
     <div class="console-bar">
-      <span>SILIX SEMICONDUCTOR TRACE &amp; SYSTEM LOGS</span>
+      <span>SILIX SYSTEM &amp; SIMULATION LOGS</span>
       <span onclick="clearLog()" style="cursor:pointer; color:var(--accent-cyan);">Clear Console</span>
     </div>
     <div class="console-output" id="consoleOutput">
-      <div class="log-banner">[SILIX] Ready. Connected to Global Semiconductor Silicon API on port 8000.</div>
+      <div class="log-banner">[SILIX] Ready. Connected to SILIX Studio Engine on port 8000.</div>
     </div>
   </div>
 
@@ -1059,7 +1058,7 @@
     // --- Preset Code Starters ---
     const SNIPPETS = {
       blank: {
-        dut: `// SILIX Cloud Semiconductor Studio
+        dut: `// SILIX RTL Studio
 // Write ANY custom Verilog RTL design here!
 
 module my_circuit (
@@ -1463,11 +1462,12 @@ endmodule`
       try {
         const res = await fetch('/health');
         if (res.ok) {
-          const data = await res.json();
-          document.getElementById('engineStatus').textContent = `Cloud Engine: Online (${data.service || 'Silix Cloud Semiconductor Studio'})`;
+          const el = document.getElementById('engineStatus');
+          if (el) el.textContent = 'Online';
         }
       } catch (e) {
-        document.getElementById('engineStatus').textContent = `Cloud Engine: Online (Silix Cloud Semiconductor Studio)`;
+        const el = document.getElementById('engineStatus');
+        if (el) el.textContent = 'Online';
       }
     }
 

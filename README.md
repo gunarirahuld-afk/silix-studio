@@ -1,4 +1,4 @@
-# SILIX — Next-Gen Cloud Semiconductor & Silicon RTL Studio 🔬⚡
+# SILIX — Silicon RTL Studio 🔬⚡
 
 [![Live Web Studio](https://img.shields.io/badge/Live%20Web%20Studio-trycloudflare-38bdf8?style=for-the-badge&logo=cloudflare)](https://britney-legitimate-hunter-cooler.trycloudflare.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)

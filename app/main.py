@@ -6,9 +6,9 @@ from fastapi.staticfiles import StaticFiles
 from app.routes import lint, simulate, schematic, health, synthesize
 
 app = FastAPI(
-    title="Silix Cloud Semiconductor Studio",
+    title="SILIX Studio",
     description=(
-        "**The Next-Gen Cloud Semiconductor & Silicon RTL Engineering Platform.**\n\n"
+        "**Next-Gen Silicon RTL Engineering Platform.**\n\n"
         "Provides cloud-native RTL linting, latch-inference detection, educational advice, "
         "cycle-accurate simulation with IEEE 1364 VCD traces, WaveDrom timing diagrams, "
         "hardware block schematics, and logic synthesis with SkyWater 130nm ASIC area estimation."

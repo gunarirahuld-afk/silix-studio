@@ -11,15 +11,13 @@ license: mit
 
 # SILIX — Silicon RTL Studio 🔬⚡
 
-[![Live Web Studio](https://img.shields.io/badge/Live%20Web%20Studio-trycloudflare-38bdf8?style=for-the-badge&logo=cloudflare)](https://yrs-readily-guide-limitation.trycloudflare.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10b981?style=for-the-badge)](LICENSE)
 [![Silicon PDK: SkyWater 130nm](https://img.shields.io/badge/PDK-SkyWater%20130nm-f59e0b?style=for-the-badge)](https://github.com/google/skywater-pdk)
 
-**SILIX** is an open-access, cloud-native semiconductor EDA platform that allows anyone—from university students and freshers to silicon hardware engineers—to design, simulate, inspect, and synthesize digital ASIC circuits directly in their web browser for free.
+**SILIX** is a browser-based learning studio for digital RTL design. Paste Verilog and get lint feedback, a simulation with WaveDrom waveforms, a block schematic, and a SkyWater 130nm cell and area *estimate*, all through a FastAPI backend.
 
-🌐 **Public Live URL:** [https://yrs-readily-guide-limitation.trycloudflare.com](https://yrs-readily-guide-limitation.trycloudflare.com)  
-📖 **Interactive Swagger Docs:** [https://yrs-readily-guide-limitation.trycloudflare.com/docs](https://yrs-readily-guide-limitation.trycloudflare.com/docs)  
+📖 **Interactive API docs:** run it locally and open `http://localhost:8000/docs`  
 🐙 **GitHub Repository:** [https://github.com/gunarirahuld-afk/silix-studio](https://github.com/gunarirahuld-afk/silix-studio)
 
 ---
@@ -37,17 +35,17 @@ license: mit
    - **Live Simulation Probes**: Displays the live probed logic values on all input/output pins.
    - **SkyWater 130nm PDK Cell Breakdown**: Lists physical standard cells (`sky130_fd_sc_hd__dfxtp_1`, `sky130_fd_sc_hd__fa_1`, etc.).
 
-2. **Cycle-Accurate Event Simulation & Waveforms 📊**
-   - Simulates sequential and combinational RTL designs.
+2. **Cycle-Based Simulation & Waveforms 📊**
+   - Built-in Python simulator for small sequential and combinational designs (a subset of Verilog).
    - Outputs standard **IEEE-1364 VCD (Value Change Dump)** files.
    - Renders interactive visual timing diagrams powered by **WaveDrom**.
 
-3. **SkyWater 130nm ASIC Silicon Synthesis 🏭**
-   - Synthesizes Verilog RTL into standard cells from Google & SkyWater's open-source 130nm PDK.
-   - Computes total standard cell count, sequential flip-flops, estimated silicon area ($\mu m^2$), and maximum clock frequency ($F_{\text{max}}$ in MHz).
+3. **SkyWater 130nm Area Estimation 🏭**
+   - Estimates flip-flop and gate counts from the RTL and maps them to typical SkyWater 130nm standard cells.
+   - Reports an estimated silicon area ($\mu m^2$) and $F_{\text{max}}$ (MHz). These are quick estimates, not a Yosys/OpenROAD run.
 
-4. **AI Hardware Mentor & Synthesizability Diagnostics 💡**
-   - Automatically detects educational hardware design bugs:
+4. **Hardware Mentor & Synthesizability Diagnostics 💡**
+   - Rule-based checks that explain common RTL mistakes:
      - Inferred latches from incomplete `if-else` or missing `default:` in `case`.
      - Blocking assignments (`=`) inside sequential `always @(posedge clk)` blocks.
      - Race conditions and multi-driven net contention.
@@ -79,7 +77,7 @@ Open your browser to: **`http://localhost:8000`**
 
 ---
 
-## ☁️ 1-Click Permanent Free Cloud Deployment
+## ☁️ Cloud Deployment
 
 ### Deploy to Render
 1. Fork or push this repository to your GitHub.
@@ -88,10 +86,19 @@ Open your browser to: **`http://localhost:8000`**
 4. Set Environment to **Docker** and Port to `8000`.
 5. Click **Deploy**!
 
-### Deploy to Hugging Face Spaces (24/7 Free)
+### Deploy to Hugging Face Spaces
 1. Create a new Space at [huggingface.co/new-space](https://huggingface.co/new-space).
 2. Choose **Docker** as the SDK.
 3. Push this repository's code to the Space's Git URL.
+
+---
+
+## 🧪 Tests
+
+```bash
+pip install pytest
+pytest -q   # 8 tests
+```
 
 ---
 
@@ -104,7 +111,7 @@ Open your browser to: **`http://localhost:8000`**
 | `/v1/rtl/lint` | `POST` | Hardware syntax & synthesizability linting |
 | `/v1/rtl/simulate` | `POST` | Cycle-accurate simulation with VCD & WaveDrom |
 | `/v1/rtl/schematic` | `POST` | Port map, netlist, and sub-circuit blocks |
-| `/v1/rtl/synthesize` | `POST` | SkyWater 130nm ASIC cell mapping and area calculation |
+| `/v1/rtl/synthesize` | `POST` | SkyWater 130nm cell and area estimate |
 
 ---
 

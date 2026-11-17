@@ -204,6 +204,47 @@ class VerilogLinter:
             if re.search(r'\bendmodule\b', clean):
                 in_comb = False
 
+        self._check_if_without_else()
+
+    def _check_if_without_else(self):
+        """Flag combinational blocks where an if chain has no final else and the
+        assigned signal has no default value before the if (classic latch)."""
+        boundary = re.compile(r'\b(always|always_ff|always_comb|always_latch|assign|initial|endmodule)\b')
+        i = 0
+        n = len(self.lines)
+        while i < n:
+            clean = self._strip_comment(self.lines[i])
+            if re.search(r'\balways\s*@\s*\(\s*\*\s*\)', clean) or re.search(r'\balways_comb\b', clean):
+                start = i + 1
+                body = [clean]
+                j = i + 1
+                while j < n and not boundary.search(self._strip_comment(self.lines[j])):
+                    body.append(self._strip_comment(self.lines[j]))
+                    j += 1
+                text = "\n".join(body)
+                # Ignore if/else inside case items handled by the case check
+                ifs = len(re.findall(r'\bif\s*\(', text))
+                elses = len(re.findall(r'\belse\b', text))
+                if ifs > elses:
+                    first_branch = re.search(r'\b(if\s*\(|case\s*\()', text)
+                    head = text[:first_branch.start()] if first_branch else text
+                    defaults = set(re.findall(r'\b([A-Za-z_]\w*)\s*(?:\[[^\]]*\])?\s*=(?!=)', head))
+                    targets = []
+                    for t in re.findall(r'\b([A-Za-z_]\w*)\s*(?:\[[^\]]*\])?\s*<?=(?!=)', text):
+                        if t not in targets and t not in defaults and t not in ("if", "else"):
+                            targets.append(t)
+                    for t in targets:
+                        self._add_issue(
+                            line=start,
+                            severity="warning",
+                            rule="INFERRED_LATCH",
+                            message=f"Signal '{t}' is not assigned on every path ('if' without a final 'else') in a combinational block.",
+                            fix_suggestion=f"Add a final 'else {t} = ...;' or give '{t}' a default value at the top of the block."
+                        )
+                i = j
+                continue
+            i += 1
+
     def _check_multi_driven_nets(self):
         drivers: dict[str, List[int]] = {}
         in_always = False

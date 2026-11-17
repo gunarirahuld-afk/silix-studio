@@ -255,3 +255,26 @@ if __name__ == "__main__":
     test_schematic_cpu_drilldown()
     test_synthesize()
     print("\nALL RTL CLOUD API TESTS PASSED SUCCESSFULLY! [OK]")
+
+
+def test_lint_if_without_else_latch():
+    latch_verilog = """
+    module gated (input en, input d, output reg q);
+        always @(*) begin
+            if (en) q = d;   // BUG: no else, q holds its value -> latch
+        end
+    endmodule
+    """
+    data = client.post("/v1/rtl/lint", json={"code": latch_verilog}).json()
+    assert "INFERRED_LATCH" in [i["rule"] for i in data["issues"]]
+
+    fixed_verilog = """
+    module gated (input en, input d, output reg q);
+        always @(*) begin
+            q = 1'b0;
+            if (en) q = d;
+        end
+    endmodule
+    """
+    data = client.post("/v1/rtl/lint", json={"code": fixed_verilog}).json()
+    assert "INFERRED_LATCH" not in [i["rule"] for i in data["issues"]]

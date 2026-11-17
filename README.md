@@ -97,7 +97,7 @@ Open your browser to: **`http://localhost:8000`**
 
 ```bash
 pip install pytest
-pytest -q   # 8 tests
+pytest -q   # 9 tests
 ```
 
 ---
